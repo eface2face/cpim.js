@@ -1,0 +1,38 @@
+{
+  "name": "cpim",
+  "version": "0.0.1-pre",
+  "description": "JavaScript implementation of CPIM \"Common Presence and Instant Messaging\" (RFC 3862)",
+  "author": "Iñaki Baz Castillo at eFace2Face, inc. (https://eface2face.com)",
+  "license": "MIT",
+  "keywords": [
+    "chat",
+    "sip",
+    "simple"
+  ],
+  "main": "lib/cpim.js",
+  "homepage": "https://github.com/eface2face/cpim",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eface2face/cpim.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eface2face/cpim/issues"
+  },
+  "dependencies": {
+    "debug": "^2.2.0"
+  },
+  "devDependencies": {
+    "browserify": "^10.2.4",
+    "gulp": "git+https://github.com/gulpjs/gulp.git#4.0",
+    "gulp-filelog": "^0.4.1",
+    "gulp-header": "^1.2.2",
+    "gulp-jscs": "^1.6.0",
+    "gulp-jscs-stylish": "^1.1.0",
+    "gulp-jshint": "^1.11.0",
+    "jshint-stylish": "~1.0.2",
+    "vinyl-source-stream": "^1.1.0"
+  },
+  "engines": {
+    "node": ">=0.10.32"
+  }
+}
