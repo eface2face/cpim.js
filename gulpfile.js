@@ -11,6 +11,7 @@ var gulp = require('gulp'),
 	header = require('gulp-header'),
 	path = require('path'),
 	fs = require('fs'),
+	mocha = require('gulp-mocha'),
 
 /**
  * Constants.
@@ -28,7 +29,7 @@ var gulp = require('gulp'),
 
 
 gulp.task('lint', function () {
-	var src = ['gulpfile.js', 'lib/**/*.js'];
+	var src = ['gulpfile.js', 'lib/**/*.js', 'test/**/*.js'];
 
 	return gulp.src(src)
 		.pipe(filelog('lint'))
@@ -37,6 +38,16 @@ gulp.task('lint', function () {
 		.pipe(stylish.combineWithHintResults())
 		.pipe(jshint.reporter('jshint-stylish', {verbose: true}))
 		.pipe(jshint.reporter('fail'));
+});
+
+
+gulp.task('test', function () {
+	return gulp.src('test/test_*.js', {read: false})
+		.pipe(mocha({
+			reporter: 'spec',
+			timeout: 500,
+			bail: true
+		}));
 });
 
 

@@ -20,7 +20,7 @@
 	"browserify": true,
 	"devel": false,
 	"jquery": false,
-	"mocha": false,
+	"mocha": true,
 	"node": true,
 	"shelljs": false,
 	"worker": false
