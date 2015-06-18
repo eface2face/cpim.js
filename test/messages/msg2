@@ -4,6 +4,7 @@ DateTime: 2000-12-13T13:40:00-08:00
 Subject: the weather will be fine today
 Subject:;lang=fr beau temps prevu pour aujourd'hui
 NS: MyFeatures <mid:MessageFeatures@id.foo.com>
+NS: MyFeatures2 <urn:com.lalala.test>
 Require: MyFeatures.VitalMessageOption
 MyFeatures.VitalMessageOption: Confirmation-requested
 MyFeatures.WackyMessageOption: Use-silly-font

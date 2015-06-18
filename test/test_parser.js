@@ -17,12 +17,13 @@ var
 describe('parse messages', function () {
 
 	it('must parse msg1', function () {
-		var msg = readMessage('msg1'),
+		var msg = readMessage('msg2'),
 			message = cpim.parse(msg);
 
 		expect(1).to.be(1);
 
-		console.log('>>> message.headers:\n', message.headers);
+		console.log('\n>>> message.headers:\n', message.headers);
+		console.log('\n>>> message.mimeHeaders:\n', message.mimeHeaders);
 	});
 
 });
