@@ -7,7 +7,9 @@ NS: MyFeatures <mid:MessageFeatures@id.foo.com>
 NS: MyFeatures2 <urn:com.lalala.test>
 Require: MyFeatures.VitalMessageOption
 MyFeatures.VitalMessageOption: Confirmation-requested
-MyFeatures.WackyMessageOption: Use-silly-font
+MyFeatures2.WackyMessageOption: Use-silly-font
+NS: <urn:now.default.jaja>
+Mierda: jeje
 
 Content-type: text/xml; charset=utf-8
 Content-ID: <1234567890@foo.com>

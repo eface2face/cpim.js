@@ -1,2 +1,23 @@
-From: MR SANDERS <im:piglet@100akerwood.com>
-To: Iñaki <sip:ibc@aliax.net>
+From: Iñaki Baz Castillo <sip:ibc@aliax.net>
+To: Alice <sip:alice@atlanta.com>
+NS: <urn:ietf:params:cpim-headers:>
+To: Bob <sip:bob@biloxi.com>
+NS: defaultPrefix <urn:ietf:params:cpim-headers:>
+defaultPrefix.To: Carol <sip:carol@carolina.com>
+DateTime: 2000-12-13T13:40:00-08:00
+subject: Ignored subject since it must be "Subject"
+NS: prefix1 <urn:cpim:test>
+prefix1.foo: Foo1
+NS: <urn:cpim:test>
+foo: Foo2
+NS: prefix2 <urn:cpim:test>
+prefix2.foo: Foo3
+prefix2.Foo: Ignore me since name it does not match "foo"
+
+Content-type: text/xml; charset=utf-8
+Content-ID: <1234567890@foo.com>
+Content-lalala: LALALA
+
+<body>
+hello
+</body>
