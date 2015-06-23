@@ -13,9 +13,11 @@ foo: Foo2
 NS: prefix2 <urn:cpim:test>
 prefix2.foo: Foo3
 prefix2.Foo: Ignore me since name it does not match "foo"
+NS: prefix2 <urn:cpim:test2>
+prefix2.foo: Bar
 
 Content-type: text/xml; charset=utf-8
-Content-ID: <1234567890@foo.com>
+Content-Id: <1234567890@foo.com>
 Content-lalala: LALALA
 
 <body>
