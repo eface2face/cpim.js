@@ -6,9 +6,9 @@ var
 	expect = require('expect.js');
 
 
-describe('creating messages', function () {
+describe('Message', function () {
 
-	it('message is created', function () {
+	it('must allow setting its fields via API', function () {
 		var
 			message = new Message(),
 			PRINTED =
@@ -67,6 +67,10 @@ describe('creating messages', function () {
 		// Verify printed message.
 
 		expect(message.toString()).to.be(PRINTED);
+
+		// Verify is a valid message.
+
+		expect(message.isValid()).to.be.ok();
 	});
 
 });

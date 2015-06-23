@@ -45,7 +45,7 @@ gulp.task('test', function () {
 	return gulp.src('test/test_*.js', {read: false})
 		.pipe(mocha({
 			reporter: 'spec',
-			timeout: 500,
+			timeout: 1000,
 			bail: true
 		}));
 });

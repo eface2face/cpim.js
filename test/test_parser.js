@@ -2,23 +2,16 @@
  * Dependencies.
  */
 var
+	tools = require('./tools'),
 	parse = require('../lib/parse'),
-	expect = require('expect.js'),
-	fs = require('fs'),
-	path = require('path'),
+	expect = require('expect.js');
 
 
-/**
- * Local variables.
- */
-	messageFolder = 'messages';
+describe('Parser', function () {
 
-
-describe('valid messages', function () {
-
-	it('msg1 is correctly parsed', function () {
+	it('must parse msg1', function () {
 		var
-			raw = readMessage('msg1'),
+			raw = tools.readFile('msg1'),
 			message = parse(raw);
 
 		expect(message).to.be.ok();
@@ -76,9 +69,9 @@ describe('valid messages', function () {
 		expect(message.body().trim()).to.be('<body>\r\nhello\r\n</body>');
 	});
 
-	it('msg1 is successfully modified', function () {
+	it('must parse msg1 and allow later modifications on it', function () {
 		var
-			raw = readMessage('msg1'),
+			raw = tools.readFile('msg1'),
 			message = parse(raw),
 			date = new Date('Tue Jun 23 2015 13:24:57 GMT+0200 (CEST)');
 
@@ -224,39 +217,20 @@ describe('valid messages', function () {
 		expect(message.body()).not.to.be.ok();
 	});
 
-});
-
-
-describe('invalid messages', function () {
-
-	it('parsing msg2 must fail due to lack of MIME fields', function () {
+	it('must fail parsing msg2 due to lack of MIME fields', function () {
 		var
-			raw = readMessage('msg2'),
+			raw = tools.readFile('msg2'),
 			message = parse(raw);
 
 		expect(message).not.to.be.ok();
 	});
 
-	it('parsing msg3 must fail due to undeclared NS prefix', function () {
+	it('must fail parsing msg3 due to undeclared NS prefix', function () {
 		var
-			raw = readMessage('msg3'),
+			raw = tools.readFile('msg3'),
 			message = parse(raw);
 
 		expect(message).not.to.be.ok();
 	});
 
 });
-
-
-
-/**
- * Helpers.
- */
-
-
-function readMessage(filename) {
-	var filepath = path.join(__dirname, messageFolder, filename),
-		msg = fs.readFileSync(filepath, 'utf8');
-
-	return msg.replace(/\n/g, '\r\n');
-}
