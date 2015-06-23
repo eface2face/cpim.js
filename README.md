@@ -22,10 +22,9 @@ var cpim = require('cpim');
 
 Take the browserified version of the library at `dist/cpim.js` folder. It exposes the global `window.cpim` module.
 
-
-## Usage
-
-*TODO*
+```html
+<script type='text/javascript' src='js/cpim.js'></script>
+```
 
 
 ## Documentation
