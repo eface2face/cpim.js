@@ -60,6 +60,10 @@ describe('creating messages', function () {
 			value: 'text/plain'
 		});
 
+		expect(message.mimeHeader('Content-Length')).to.be('5');
+
+		expect(message.body()).to.be('HELLO');
+
 		// Verify printed message.
 
 		expect(message.toString()).to.be(PRINTED);
