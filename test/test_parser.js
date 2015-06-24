@@ -2,8 +2,8 @@
  * Dependencies.
  */
 var
+	cpim = require('../'),
 	tools = require('./tools'),
-	parse = require('../lib/parse'),
 	expect = require('expect.js');
 
 
@@ -12,7 +12,7 @@ describe('Parser', function () {
 	it('must parse msg1', function () {
 		var
 			raw = tools.readFile('msg1'),
-			message = parse(raw);
+			message = cpim.parse(raw);
 
 		expect(message).to.be.ok();
 
@@ -72,7 +72,7 @@ describe('Parser', function () {
 	it('must parse msg1 and allow later modifications on it', function () {
 		var
 			raw = tools.readFile('msg1'),
-			message = parse(raw),
+			message = cpim.parse(raw),
 			date = new Date('Tue Jun 23 2015 13:24:57 GMT+0200 (CEST)');
 
 		expect(message).to.be.ok();
@@ -211,23 +211,23 @@ describe('Parser', function () {
 
 		message.body(null);
 
-		expect(message.body()).not.to.be.ok();
+		expect(message.body()).to.be(undefined);
 	});
 
 	it('must fail parsing msg2 due to lack of MIME Content-Type header', function () {
 		var
 			raw = tools.readFile('msg2'),
-			message = parse(raw);
+			message = cpim.parse(raw);
 
-		expect(message).not.to.be.ok();
+		expect(message).to.be(false);
 	});
 
 	it('must fail parsing msg3 due to undeclared NS prefix', function () {
 		var
 			raw = tools.readFile('msg3'),
-			message = parse(raw);
+			message = cpim.parse(raw);
 
-		expect(message).not.to.be.ok();
+		expect(message).to.be(false);
 	});
 
 });

@@ -10,7 +10,18 @@ describe('Message', function () {
 
 	it('must allow setting its fields via API', function () {
 		var
-			message = new cpim.Message(),
+			message = cpim.factory({
+				from: {
+					name: 'Iñaki Baz Castillo',
+					uri: 'im:inaki.baz@eface2face.com'
+				},
+				to: {
+					name: 'Alicia',
+					uri: 'im:alicia@atlanta.com'
+				},
+				dateTime: false,
+				body: 'HELLO'
+			}),
 			PRINTED =
 				'From: Iñaki Baz Castillo <im:inaki.baz@eface2face.com>\r\n' +
 				'To: Alicia <im:alicia@atlanta.com>\r\n' +
@@ -23,16 +34,6 @@ describe('Message', function () {
 
 		// Set message fields.
 
-		message.from({
-			name: 'Iñaki Baz Castillo',
-			uri: 'im:inaki.baz@eface2face.com'
-		});
-
-		message.to({
-			name: 'Alicia',
-			uri: 'im:alicia@atlanta.com'
-		});
-
 		message.subject('Urgent, read pliz pliz');
 
 		message.contentType({
@@ -41,8 +42,6 @@ describe('Message', function () {
 		});
 
 		message.mimeHeader('Content-Length', '5');
-
-		message.body('HELLO');
 
 		// Verify field values.
 
