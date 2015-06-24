@@ -154,9 +154,6 @@ describe('Parser', function () {
 
 		expect(message.dateTime()).not.to.be.ok();
 
-		message.addNS('urn:cpim:test3');
-		message.addNS('urn:cpim:test4');
-
 		message.header('urn:cpim:test3', 'baz', 'BAZ');
 
 		expect(message.header('urn:cpim:test3', 'baz')).to.be('BAZ');

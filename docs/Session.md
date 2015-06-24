@@ -8,6 +8,10 @@ A `Session` instance is usually associated to a "network channel" (such as an al
 
 A `Session` does not send messages over the Internet by itself, nor it receives messages. Instead the application must provide the `Session` with messages received from the remote peer, and must tell the `Session` about  ongoing messages. The `Session` will then emit events to notify the application about the receipt of a CPIM message or the need of sending a message to the remote peer.
 
+```javascript
+var session = new cpim.Session();
+```
+
 
 ## Methods
 

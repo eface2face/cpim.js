@@ -173,6 +173,7 @@ Message.prototype.dateTime = function (date) {
 
 Message.prototype.header = function (nsUri, name, value) {
 	if (nsUri) {
+		nsUri = nsUri.toLowerCase();
 		name = nsUri + '@' + name;
 	}
 
@@ -183,9 +184,7 @@ Message.prototype.header = function (nsUri, name, value) {
 		}
 	// Set.
 	} else if (value) {
-		if (nsUri && !this._nsUris[nsUri]) {
-			throw new Error('NS uri "' + nsUri + '" not declared, use addNS() method first');
-		}
+		this.addNS(nsUri);
 
 		this._cpimHeaders[name] = [{
 			value: value
@@ -199,6 +198,7 @@ Message.prototype.header = function (nsUri, name, value) {
 
 Message.prototype.headers = function (nsUri, name, values) {
 	if (nsUri) {
+		nsUri = nsUri.toLowerCase();
 		name = nsUri + '@' + name;
 	}
 
@@ -213,9 +213,7 @@ Message.prototype.headers = function (nsUri, name, values) {
 		}
 	// Set.
 	} else {
-		if (nsUri && !this._nsUris[nsUri]) {
-			throw new Error('NS uri "' + nsUri + '" not declared, use addNS() method first');
-		}
+		this.addNS(nsUri);
 
 		this._cpimHeaders[name] = [];
 		values.forEach(function (value) {
@@ -224,22 +222,6 @@ Message.prototype.headers = function (nsUri, name, values) {
 			});
 		}, this);
 	}
-};
-
-
-Message.prototype.addNS = function (uri) {
-	var prefix;
-
-	if (typeof uri !== 'string' || !uri) {
-		throw new Error('argument must be a non empty String');
-	}
-
-	if (this._nsUris[uri] || uri === grammar.NS_PREFIX_CORE) {
-		return;
-	}
-
-	prefix = 'Prefix' + (Object.keys(this._nsUris).length + 1);
-	this._nsUris[uri] = prefix;
 };
 
 
@@ -385,6 +367,27 @@ Message.prototype.isValid = function () {
 	return true;
 };
 
+
+/**
+ * Private API.
+ */
+
+
+Message.prototype.addNS = function (uri) {
+	var prefix;
+
+	if (typeof uri !== 'string' || !uri) {
+		throw new Error('argument must be a non empty String');
+	}
+
+	if (this._nsUris[uri] || uri === grammar.NS_PREFIX_CORE) {
+		return;
+	}
+
+	prefix = 'Prefix' + (Object.keys(this._nsUris).length + 1);
+	this._nsUris[uri] = prefix;
+};
+
 },{"./grammar":4,"debug":7}],2:[function(require,module,exports){
 /**
  * Expose the Session class.
@@ -487,14 +490,16 @@ function emit() {
  * Dependencies.
  */
 var
-	Session = require('./Session');
+	Session = require('./Session'),
+	Message = require('./Message');
 
 
 module.exports = {
-	Session: Session
+	Session: Session,
+	Message: Message
 };
 
-},{"./Session":2}],4:[function(require,module,exports){
+},{"./Message":1,"./Session":2}],4:[function(require,module,exports){
 
 var
 	/**
