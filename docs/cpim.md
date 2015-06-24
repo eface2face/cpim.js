@@ -15,8 +15,6 @@ If given, `data` object may contain the following fields:
 * `dateTime` (Boolean): If `false` the message will not include a *DateTime* header with the current date.
 * `body` (String): MIME body of the message.
 
-*Example:*
-
 ```javascript
 var message = cpim.factory({
     from: {name: 'Alice', uri: 'im:alice@atlanta.com'},
@@ -26,7 +24,7 @@ var message = cpim.factory({
 });
 ```
 
-Note that further modifications can be done to the generated [Message](Message.md) once it is returned by the `factory()` call.
+*Note:* Further modifications can be done to the message returned by the `factory()` call by means of the [Message](Message.md) API.
 
 
 ### `cpim.parse(raw)`
@@ -34,3 +32,17 @@ Note that further modifications can be done to the generated [Message](Message.m
 Parses the given raw CPIM message. If valid an instance of [Message](Message.md) is returned, `false` otherwise.
 
 * `raw` (String): A CPIM message.
+
+```javascript
+myWebSocket.onmessage = function (event) {
+    var
+        raw = event.data,
+        message = cpim.parse(raw);
+
+    if (message) {
+        console.log('CPIM message received: %o', message);
+    } else {
+        console.error('invalid CPIM message received: "%s"', raw);
+    }
+});
+```
