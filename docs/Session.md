@@ -23,7 +23,7 @@ If given, `data` object may contain the following fields:
 
 * `from` (Object): Same data passed to [message.from(data)](Message.md#messagefromdata). Outgoing messages will have this *From* header if no *From* header is present in them.
 * `to` (Object): Same data passed to [message.to(data)](Message.md#messagetodata). Outgoing messages will have this *To* header if no *To* header is present in them.
-* `contentType` (Object): Same data passed to [message.to(data)](Message.md#messagecontenttypedata). Outgoing messages will have this *Content-Type* MIME header if no *Content-Type* header is present in them.
+* `contentType` (Object): Same data passed to [message.contentType(data)](Message.md#messagecontenttypedata). Outgoing messages will have this *Content-Type* MIME header if no *Content-Type* header is present in them.
 
 *Example:*
 
