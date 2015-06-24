@@ -6,10 +6,32 @@ A peer may be an intermediary box sending/forwarding messages in behalf of other
 
 A `Session` instance is usually associated to a "network channel" (such as an already established *WebSocket*, *RTCDataChannel*, a [MSRP](https://tools.ietf.org/html/rfc4975) session, etc). It is up to the application/user to manage such a relationship between both entities.
 
-A `Session` does not send messages over the Internet by itself, nor it receives messages. Instead the application must provide the `Session` with messages received from the remote peer, and must tell the `Session` about  ongoing messages. The `Session` will then emit events to notify the application about the receipt of a CPIM message or the need of sending a message to the remote peer.
+A `Session` does not send messages over the Internet by itself, nor it receives messages. Instead the application must provide the `Session` with messages received from the remote peer, and must tell the `Session` about  outgoing messages. The `Session` will then emit events to notify the application about the receipt of a CPIM message or the need of sending a message to the remote peer.
+
+
+## Constructor
 
 ```javascript
-var session = new cpim.Session();
+var session = new cpim.Session(data);
+```
+
+The constructor accepts the following argument:
+
+* `data` (Object, optional): Session data.
+
+If given, `data` object may contain the following fields:
+
+* `from` (Object): Same data passed to [message.from(data)](Message.md#messagefromdata). Outgoing messages will have this *From* header if no *From* header is present in them.
+* `to` (Object): Same data passed to [message.to(data)](Message.md#messagetodata). Outgoing messages will have this *To* header if no *To* header is present in them.
+* `contentType` (Object): Same data passed to [message.to(data)](Message.md#messagecontenttypedata). Outgoing messages will have this *Content-Type* MIME header if no *Content-Type* header is present in them.
+
+*Example:*
+
+```javascript
+var session = new cpim.Session({
+    from: {name: 'Alice', uri: 'im:alice@atlanta.com'},
+    to: {name: 'Bob', uri: 'im:bob@biloxi.com'}
+});
 ```
 
 

@@ -2,7 +2,7 @@
  * Dependencies.
  */
 var
-	Message = require('../lib/Message'),
+	cpim = require('../'),
 	expect = require('expect.js');
 
 
@@ -10,7 +10,7 @@ describe('Message', function () {
 
 	it('must allow setting its fields via API', function () {
 		var
-			message = new Message(),
+			message = new cpim.Message(),
 			PRINTED =
 				'From: Iñaki Baz Castillo <im:inaki.baz@eface2face.com>\r\n' +
 				'To: Alicia <im:alicia@atlanta.com>\r\n' +

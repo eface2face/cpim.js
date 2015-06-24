@@ -2,6 +2,9 @@
 
 A `Message` instance represents a CPIM message (including CPIM headers, MIME headers and MIME body) as the [RFC 3862](http://tools.ietf.org/html/rfc3862) states.
 
+
+## Constructor
+
 ```javascript
 var message = new cpim.Message();
 ```
@@ -174,6 +177,8 @@ Sets the CPIM *DateTime* header. Given `date` must be an instance of [Date](http
 
 If `date` is `null` the header is removed.
 
+*NOTE:* For outgoing messages the library automatically appends the *DateTime* header if the given message does not already contain it.
+
 ```javascript
 var now = new Date(Date.now());
 
@@ -315,4 +320,4 @@ myWebSocket.send(message.toString());
 
 ### `message.isValid()`
 
-Returns `true` if the current message is valid according to the specification rules (for example it MUST contain CPIM and MIME headers).
+Returns `true` if the current message is valid according to the specification rules (for example it MUST contain, at least, the 'Content-Type' MIME header).

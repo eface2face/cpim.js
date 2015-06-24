@@ -214,7 +214,7 @@ describe('Parser', function () {
 		expect(message.body()).not.to.be.ok();
 	});
 
-	it('must fail parsing msg2 due to lack of MIME fields', function () {
+	it('must fail parsing msg2 due to lack of MIME Content-Type header', function () {
 		var
 			raw = tools.readFile('msg2'),
 			message = parse(raw);
