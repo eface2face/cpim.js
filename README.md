@@ -2,7 +2,18 @@
 
 JavaScript implementation of CPIM "Common Presence and Instant Messaging" ([RFC 3862](https://tools.ietf.org/html/rfc3862)).
 
-Suitable for parsing and generating CPIM messages, allowing access to CPIM headers, MIME headers and MIME body of the CPIM message.
+Suitable for parsing and generating CPIM messages, allowing access to CPIM headers, MIME headers and MIME body of messages such as:
+
+```
+From: Iñaki Baz Castillo <im:inaki.baz@eface2face.com>
+To: Alice <sip:alice@atlanta.com>
+Subject: Wines tonight!
+DateTime: 2015-06-25T11:30:00-08:00
+
+Content-type: text/plain; charset=utf-8
+
+Hi Alice, tonight wines at home
+```
 
 
 ## Installation
@@ -10,7 +21,7 @@ Suitable for parsing and generating CPIM messages, allowing access to CPIM heade
 ### **npm**:
 
 ```bash
-$ npm install cpim
+$ npm install cpim --save
 ```
 
 And then:
