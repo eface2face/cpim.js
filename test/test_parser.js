@@ -1,7 +1,7 @@
-/**
- * Dependencies.
- */
 var
+	/**
+	 * Dependencies.
+	 */
 	cpim = require('../'),
 	tools = require('./tools'),
 	expect = require('expect.js');

@@ -1,13 +1,13 @@
-/**
- * Dependencies.
- */
 var
+	/**
+	 * Dependencies.
+	 */
 	path = require('path'),
 	fs = require('fs'),
 
-/**
- * Constants.
- */
+	/**
+	 * Constants.
+	 */
 	MESSAGES_FOLDER = 'messages';
 
 

@@ -1,4 +1,4 @@
-# cpim
+# cpim.js
 
 JavaScript implementation of CPIM "Common Presence and Instant Messaging" ([RFC 3862](https://tools.ietf.org/html/rfc3862)).
 
