@@ -2,6 +2,8 @@
 
 JavaScript implementation of CPIM "Common Presence and Instant Messaging" ([RFC 3862](https://tools.ietf.org/html/rfc3862)).
 
+Suitable for parsing and generating CPIM messages, allowing access to CPIM headers, MIME headers and MIME body of the CPIM message.
+
 
 ## Installation
 
@@ -20,7 +22,7 @@ var cpim = require('cpim');
 
 ## Browserified library
 
-Take the browserified version of the library at `dist/cpim.js` folder. It exposes the global `window.cpim` module.
+Take the browserified version of the library at `dist/cpim.js`. It exposes the global `window.cpim` module.
 
 ```html
 <script type='text/javascript' src='js/cpim.js'></script>
