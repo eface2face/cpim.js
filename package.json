@@ -1,6 +1,6 @@
 {
   "name": "cpim",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "JavaScript implementation of CPIM \"Common Presence and Instant Messaging\" (RFC 3862)",
   "author": "Iñaki Baz Castillo at eFace2Face, inc. (https://eface2face.com)",
   "license": "MIT",

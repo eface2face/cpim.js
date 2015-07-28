@@ -46,3 +46,8 @@ myWebSocket.onmessage = function (event) {
     }
 });
 ```
+
+
+### `cpim.Message`
+
+The [Message](Message.md) class. Useful to check `instanceof cpim.Message`.

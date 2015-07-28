@@ -1,5 +1,5 @@
 /*
- * cpim v1.0.1
+ * cpim v1.1.0
  * JavaScript implementation of CPIM "Common Presence and Instant Messaging" (RFC 3862)
  * Copyright 2015 Iñaki Baz Castillo at eFace2Face, inc. (https://eface2face.com)
  * License MIT
@@ -396,10 +396,11 @@ Message.prototype.addNS = function (uri) {
 },{"./grammar":4,"debug":6}],2:[function(require,module,exports){
 module.exports = {
 	factory: require('./factory'),
-	parse: require('./parse')
+	parse: require('./parse'),
+	Message: require('./Message')
 };
 
-},{"./factory":3,"./parse":5}],3:[function(require,module,exports){
+},{"./Message":1,"./factory":3,"./parse":5}],3:[function(require,module,exports){
 /**
  * Expose the factory function.
  */
@@ -737,10 +738,10 @@ function parse(raw) {
 	rawHeaders = raw.slice(0, headersEnd);
 
 	mimeHeadersEnd = raw.indexOf('\r\n\r\n', headersEnd + 1);
-	rawMimeHeaders = raw.slice(headersEnd + 4, mimeHeadersEnd).trim();
+	rawMimeHeaders = raw.slice(headersEnd + 4, mimeHeadersEnd);
 
 	if (mimeHeadersEnd !== -1) {
-		rawBody = raw.slice(mimeHeadersEnd + 4, -1);
+		rawBody = raw.slice(mimeHeadersEnd + 4);
 	}
 
 	// Init the Message instance.
