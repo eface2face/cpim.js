@@ -237,7 +237,9 @@ Returns the MIME *Content-Type* header as an object with these fields:
 
 * `type` (String): Type.
 * `subtype` (String): Subtype.
+* `fulltype` (String): MIME type in "type/subtype" format (no parameters).
 * `params` (Object): Param/value pairs.
+* `value` (String): The full string value.
 
 Returns `undefined` if there is no *Content-Type* header.
 
