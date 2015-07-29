@@ -9,17 +9,17 @@ Returns an instance of [Message](Message.md).
 
 If given, `data` object may contain the following fields:
 
-* `from` (Object): Same data passed to [message.from(data)](Message.md#messagefromdata).
-* `to` (Object): Same data passed to [message.to(data)](Message.md#messagetodata).
-* `contentType` (Object): Same data passed to [message.contentType(data)](Message.md#messagecontenttypedata).
+* `from` (String): Same data passed to [message.from(value)](Message.md#messagefromvalue).
+* `to` (String): Same data passed to [message.to(value)](Message.md#messagetovalue).
+* `contentType` (String): Same data passed to [message.contentType(value)](Message.md#messagecontenttypevalue).
 * `dateTime` (Boolean): If `false` the message will not include a *DateTime* header with the current date.
 * `body` (String): MIME body of the message.
 
 ```javascript
 var message = cpim.factory({
-    from: {name: 'Alice', uri: 'im:alice@atlanta.com'},
-    to: {name: 'Bob', uri: 'im:bob@biloxi.com'},
-    contentType: {type: 'text', subtype: 'plain'},
+    from: 'Alice <im:alice@atlanta.com>',
+    to: 'Bob <im:bob@biloxi.com>',
+    contentType: 'text/plain',
     body: 'HELLO'
 });
 ```

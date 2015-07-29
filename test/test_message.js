@@ -13,7 +13,7 @@ var
 					'To: Alicia <im:alicia@atlanta.com>\r\n' +
 					'Subject: Urgent, read pliz pliz\r\n' +
 					'\r\n' +
-					'Content-Type: text/plain\r\n' +
+					'Content-Type: text/plain ; charset = utf-8\r\n' +
 					'Content-Length: 5\r\n' +
 					'\r\n' +
 					'HELLO',
@@ -28,14 +28,8 @@ describe('Message', function () {
 
 	it('must create a message via cpim.factory()', function () {
 		message = cpim.factory({
-			from: {
-				name: 'Iñaki Baz Castillo',
-				uri: 'im:inaki.baz@eface2face.com'
-			},
-			to: {
-				name: 'Alicia',
-				uri: 'im:alicia@atlanta.com'
-			},
+			from: 'Iñaki Baz Castillo <im:inaki.baz@eface2face.com>',
+			to: 'Alicia <im:alicia@atlanta.com>',
 			dateTime: false,
 			body: 'HELLO'
 		});
@@ -58,10 +52,7 @@ describe('Message', function () {
 
 		message.subject('Urgent, read pliz pliz');
 
-		message.contentType({
-			type: 'text',
-			subtype: 'plain'
-		});
+		message.contentType('text/plain ; charset = utf-8');
 
 		message.mimeHeader('Content-Length', '5');
 
@@ -70,9 +61,13 @@ describe('Message', function () {
 		expect(message.subject()).to.be('Urgent, read pliz pliz');
 
 		expect(message.contentType()).to.eql({
+			fulltype: 'text/plain',
 			type: 'text',
 			subtype: 'plain',
-			value: 'text/plain'
+			params: {
+				charset: 'utf-8'
+			},
+			value: 'text/plain ; charset = utf-8'
 		});
 
 		expect(message.mimeHeader('Content-Length')).to.be('5');

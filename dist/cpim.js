@@ -1,5 +1,5 @@
 /*
- * cpim v1.1.0
+ * cpim v2.0.0
  * JavaScript implementation of CPIM "Common Presence and Instant Messaging" (RFC 3862)
  * Copyright 2015 Iñaki Baz Castillo at eFace2Face, inc. (https://eface2face.com)
  * License MIT
@@ -18,6 +18,8 @@ var
 	debug = require('debug')('cpim:Message'),
 	debugerror = require('debug')('cpim:ERROR:Message'),
 	grammar = require('./grammar'),
+	parseMimeHeaderValue = require('./parse').parseMimeHeaderValue,
+	parseCpimHeaderValue = require('./parse').parseCpimHeaderValue,
 	slice = Array.prototype.slice;
 
 debugerror.log = console.warn.bind(console);
@@ -33,16 +35,17 @@ function Message() {
 }
 
 
-Message.prototype.from = function (data) {
+Message.prototype.from = function (value) {
 	// Get.
-	if (!data && data !== null) {
+	if (!value && value !== null) {
 		if (this._cpimHeaders.From) {
 			return this._cpimHeaders.From[0];
 		}
 	// Set.
-	} else if (data) {
-		data.value = grammar.cpimHeaderRules.From.format(data);
-		this._cpimHeaders.From = [data];
+	} else if (value) {
+		this._cpimHeaders.From = [
+			parseCpimHeaderValue(grammar.cpimHeaderRules.From, value)
+		];
 	// Delete.
 	} else {
 		delete this._cpimHeaders.From;
@@ -50,16 +53,17 @@ Message.prototype.from = function (data) {
 };
 
 
-Message.prototype.to = function (data) {
+Message.prototype.to = function (value) {
 	// Get.
-	if (!data && data !== null) {
+	if (!value && value !== null) {
 		if (this._cpimHeaders.To) {
 			return this._cpimHeaders.To[0];
 		}
 	// Set.
-	} else if (data) {
-		data.value = grammar.cpimHeaderRules.To.format(data);
-		this._cpimHeaders.To = [data];
+	} else if (value) {
+		this._cpimHeaders.To = [
+			parseCpimHeaderValue(grammar.cpimHeaderRules.To, value)
+		];
 	// Delete.
 	} else {
 		delete this._cpimHeaders.To;
@@ -67,31 +71,33 @@ Message.prototype.to = function (data) {
 };
 
 
-Message.prototype.tos = function (datas) {
+Message.prototype.tos = function (values) {
 	// Get.
-	if (!datas) {
+	if (!values) {
 		return this._cpimHeaders.To || [];
 	// Set.
 	} else {
 		this._cpimHeaders.To = [];
-		datas.forEach(function (data) {
-			data.value = grammar.cpimHeaderRules.To.format(data);
-			this._cpimHeaders.To.push(data);
+		values.forEach(function (value) {
+			this._cpimHeaders.To.push(
+				parseCpimHeaderValue(grammar.cpimHeaderRules.To, value)
+			);
 		}, this);
 	}
 };
 
 
-Message.prototype.cc = function (data) {
+Message.prototype.cc = function (value) {
 	// Get.
-	if (!data && data !== null) {
+	if (!value && value !== null) {
 		if (this._cpimHeaders.CC) {
 			return this._cpimHeaders.CC[0];
 		}
 	// Set.
-	} else if (data) {
-		data.value = grammar.cpimHeaderRules.CC.format(data);
-		this._cpimHeaders.CC = [data];
+	} else if (value) {
+		this._cpimHeaders.CC = [
+			parseCpimHeaderValue(grammar.cpimHeaderRules.CC, value)
+		];
 	// Delete.
 	} else {
 		delete this._cpimHeaders.CC;
@@ -99,16 +105,17 @@ Message.prototype.cc = function (data) {
 };
 
 
-Message.prototype.ccs = function (datas) {
+Message.prototype.ccs = function (values) {
 	// Get.
-	if (!datas) {
+	if (!values) {
 		return this._cpimHeaders.CC || [];
 	// Set.
 	} else {
 		this._cpimHeaders.CC = [];
-		datas.forEach(function (data) {
-			data.value = grammar.cpimHeaderRules.CC.format(data);
-			this._cpimHeaders.CC.push(data);
+		values.forEach(function (value) {
+			this._cpimHeaders.CC.push(
+				parseCpimHeaderValue(grammar.cpimHeaderRules.CC, value)
+			);
 		}, this);
 	}
 };
@@ -153,8 +160,6 @@ Message.prototype.subjects = function (values) {
 
 
 Message.prototype.dateTime = function (date) {
-	var data;
-
 	// Get.
 	if (!date && date !== null) {
 		if (this._cpimHeaders.DateTime) {
@@ -162,11 +167,9 @@ Message.prototype.dateTime = function (date) {
 		}
 	// Set.
 	} else if (date) {
-		data = {
-			date: date
-		};
-		data.value = grammar.cpimHeaderRules.DateTime.format(data);
-		this._cpimHeaders.DateTime = [data];
+		this._cpimHeaders.DateTime = [
+			parseCpimHeaderValue(grammar.cpimHeaderRules.DateTime, date)
+		];
 	// Delete.
 	} else {
 		delete this._cpimHeaders.DateTime;
@@ -228,14 +231,14 @@ Message.prototype.headers = function (nsUri, name, values) {
 };
 
 
-Message.prototype.contentType = function (data) {
+Message.prototype.contentType = function (value) {
 	// Get.
-	if (!data && data !== null) {
+	if (!value && value !== null) {
 		return this._mimeHeaders['Content-Type'];
 	// Set.
-	} else if (data) {
-		data.value = grammar.mimeHeaderRules['Content-Type'].format(data);
-		this._mimeHeaders['Content-Type'] = data;
+	} else if (value) {
+		this._mimeHeaders['Content-Type'] =
+			parseMimeHeaderValue(grammar.mimeHeaderRules['Content-Type'], value);
 	// Delete.
 	} else {
 		delete this._mimeHeaders['Content-Type'];
@@ -393,7 +396,7 @@ Message.prototype.addNS = function (uri) {
 	this._nsUris[uri] = prefix;
 };
 
-},{"./grammar":4,"debug":6}],2:[function(require,module,exports){
+},{"./grammar":4,"./parse":5,"debug":6}],2:[function(require,module,exports){
 module.exports = {
 	factory: require('./factory'),
 	parse: require('./parse'),
@@ -504,14 +507,22 @@ grammar.cpimHeaderRules = {
 
 	DateTime: {
 		reg: function (value) {
-			var seconds = Date.parse(value);
+			var seconds;
 
-			if (seconds) {
+			if (typeof value === 'object') {
 				return {
-					date: new Date(seconds)
+					date: value
 				};
 			} else {
-				return undefined;
+				seconds = Date.parse(value);
+
+				if (seconds) {
+					return {
+						date: new Date(seconds)
+					};
+				} else {
+					return undefined;
+				}
 			}
 		},
 		format: function (data) {
@@ -550,7 +561,8 @@ grammar.mimeHeaderRules = {
 	'Content-Type': {
 		// reg: /^([^\t \/]+)\/([^\t ;]+).*$/,
 		reg: function (value) {
-			var match = value.match(REGEXP_CONTENT_TYPE),
+			var
+				match = value.match(REGEXP_CONTENT_TYPE),
 				params = {};
 
 			if (!match) {
@@ -565,13 +577,14 @@ grammar.mimeHeaderRules = {
 			}
 
 			return {
+				fulltype: match[1].toLowerCase() + '/' + match[2].toLowerCase(),
 				type: match[1].toLowerCase(),
 				subtype: match[2].toLowerCase(),
 				params: params
 			};
 		},
 		format: function (data) {
-			return data.type + '/' + data.subtype + serializeParams(data.params);
+			return data.value;
 		}
 	}
 };
@@ -667,35 +680,13 @@ function parseParams(rawParams) {
 	return params;
 }
 
-
-function serializeParams(params) {
-	var
-		str = '',
-		value;
-
-
-	if (!params) {
-		return str;
-	}
-
-	Object.keys(params).forEach(function (param) {
-		value = params[param];
-
-		if (value) {
-			str += ';' + param.toLowerCase() + '=' + value;
-		} else {
-			str += ';' + param.toLowerCase();
-		}
-	});
-
-	return str;
-}
-
 },{}],5:[function(require,module,exports){
 /**
- * Expose the parse function.
+ * Expose the parse function and some util funtions within it.
  */
 module.exports = parse;
+parse.parseMimeHeaderValue = parseMimeHeaderValue;
+parse.parseCpimHeaderValue = parseCpimHeaderValue;
 
 var
 	/**
@@ -747,8 +738,8 @@ function parse(raw) {
 	// Init the Message instance.
 	message = new Message();
 
-	// Parse headers.
-	if (!parseHeaders(rawHeaders)) {
+	// Parse CPIM headers.
+	if (!parseCpimHeaders(rawHeaders)) {
 		return false;
 	}
 
@@ -765,7 +756,7 @@ function parse(raw) {
 	return message;
 
 
-	function parseHeaders(rawHeaders) {
+	function parseCpimHeaders(rawHeaders) {
 		var
 			lines = rawHeaders.split('\r\n'),
 			i, len,
@@ -773,7 +764,7 @@ function parse(raw) {
 			ns = {};  // key: prefix, value: uri.
 
 		for (i = 0, len = lines.length; i < len; i++) {
-			if (!parseHeader(lines[i])) {
+			if (!parseCpimHeader(lines[i])) {
 				debugerror('discarding message due to invalid header: "%s"', lines[i]);
 				return false;
 			}
@@ -782,17 +773,10 @@ function parse(raw) {
 		return true;
 
 
-		function parseHeader(line) {
+		function parseCpimHeader(line) {
 			var
 				match = line.match(REGEXP_VALID_HEADER),
-				prefix,
-				name,
-				value,
-				nsUri,
-				rule,
-				parsedValue,
-				i, len,
-				data = {};
+				prefix, name, value, nsUri, rule, data;
 
 			if (!match) {
 				debugerror('invalid header "%s"', line);
@@ -832,26 +816,12 @@ function parse(raw) {
 
 			rule = grammar.cpimHeaderRules[name] || grammar.unknownCpimHeaderRule;
 
-			if (typeof rule.reg !== 'function') {
-				parsedValue = value.match(rule.reg);
-				if (!parsedValue) {
-					debugerror('wrong header: "%s"', line);
-					return false;
-				}
-
-				for (i = 0, len = rule.names.length; i < len; i++) {
-					if (parsedValue[i + 1] !== undefined) {
-						data[rule.names[i]] = parsedValue[i + 1];
-					}
-				}
-			} else {
-				data = rule.reg(value);
-				if (!data) {
-					debugerror('wrong header: "%s"', line);
-					return false;
-				}
+			try {
+				data = parseMimeHeaderValue(rule, value);
+			}	catch (error) {
+				debugerror('wrong header: "%s"', line);
+				return false;
 			}
-			data.value = value;
 
 			// Special treatment for NS headers.
 			if (name === 'NS') {
@@ -887,12 +857,7 @@ function parse(raw) {
 		function parseMimeHeader(line) {
 			var
 				match = line.match(REGEXP_VALID_MIME_HEADER),
-				name,
-				value,
-				rule,
-				parsedValue,
-				i, len,
-				data = {};
+				name, value, rule, data;
 
 			if (!match) {
 				debugerror('invalid MIME header "%s"', line);
@@ -904,31 +869,77 @@ function parse(raw) {
 
 			rule = grammar.mimeHeaderRules[name] || grammar.unknownMimeHeaderRule;
 
-			if (typeof rule.reg !== 'function') {
-				parsedValue = value.match(rule.reg);
-				if (!parsedValue) {
-					debugerror('wrong MIME header: "%s"', line);
-					return false;
-				}
-
-				for (i = 0, len = rule.names.length; i < len; i++) {
-					if (parsedValue[i + 1] !== undefined) {
-						data[rule.names[i]] = parsedValue[i + 1];
-					}
-				}
-			} else {
-				data = rule.reg(value);
-				if (!data) {
-					debugerror('wrong MIME header: "%s"', line);
-					return false;
-				}
+			try {
+				data = parseMimeHeaderValue(rule, value);
+			}	catch (error) {
+				debugerror('wrong MIME header: "%s"', line);
+				return false;
 			}
-			data.value = value;
 
 			message._mimeHeaders[name] = data;
 			return true;
 		}
 	}
+}
+
+
+function parseMimeHeaderValue(rule, value) {
+	var
+		parsedValue,
+		i, len,
+		data = {};
+
+	if (typeof rule.reg !== 'function') {
+		parsedValue = value.match(rule.reg);
+		if (!parsedValue) {
+			throw new Error('parseMimeHeader() failed for ' + value);
+		}
+
+		for (i = 0, len = rule.names.length; i < len; i++) {
+			if (parsedValue[i + 1] !== undefined) {
+				data[rule.names[i]] = parsedValue[i + 1];
+			}
+		}
+	} else {
+		data = rule.reg(value);
+		if (!data) {
+			throw new Error('parseMimeHeader() failed for ' + value);
+		}
+	}
+
+	data.value = value;
+
+	return data;
+}
+
+
+function parseCpimHeaderValue(rule, value) {
+	var
+		parsedValue,
+		i, len,
+		data = {};
+
+	if (typeof rule.reg !== 'function') {
+		parsedValue = value.match(rule.reg);
+		if (!parsedValue) {
+			throw new Error('parseCpimHeader() failed for ' + value);
+		}
+
+		for (i = 0, len = rule.names.length; i < len; i++) {
+			if (parsedValue[i + 1] !== undefined) {
+				data[rule.names[i]] = parsedValue[i + 1];
+			}
+		}
+	} else {
+		data = rule.reg(value);
+		if (!data) {
+			throw new Error('parseCpimHeader() failed for ' + value);
+		}
+	}
+
+	data.value = value;
+
+	return data;
 }
 
 },{"./Message":1,"./grammar":4,"debug":6}],6:[function(require,module,exports){

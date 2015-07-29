@@ -19,6 +19,7 @@ Returns the CPIM *From* header as an object with these fields:
 
 * `name` (String, optional): Display name.
 * `uri` (String): URI.
+* `value` (String): The full string value.
 
 Returns `undefined` if there is no *From* header.
 
@@ -29,20 +30,15 @@ message.from();
 ```
 
 
-### `message.from(data)`
+### `message.from(value)`
 
-Sets the CPIM *From* header. Given `data` must be an object with these fields:
+Sets the CPIM *From* header with the given string.
 
-* `name` (String, optional): Display name.
-* `uri` (String): URI.
-
-If `data` is `null` the header is removed.
+If `value` is `null` the header is removed.
 
 ```javascript
-message.from({
-    name: 'Alice',
-    uri: 'im:alice@atlanta.com'
-});
+message.from('Alice <im:alice@atlanta.com>');
+message.from('<im:alice@atlanta.com>');
 ```
 
 
@@ -52,18 +48,16 @@ Returns the first CPIM *To* header as an object with these fields:
 
 * `name` (String, optional): Display name.
 * `uri` (String): URI.
+* `value` (String): The full string value.
 
 Returns `undefined` if there is no *To* header.
 
 
-### `message.to(data)`
+### `message.to(value)`
 
-Sets the CPIM *To* header. Given `data` must be an object with these fields:
+Sets the CPIM *To* header with the given string.
 
-* `name` (String, optional): Display name.
-* `uri` (String): URI.
-
-If `data` is `null` the header is removed.
+If `value` is `null` the header is removed.
 
 
 ### `message.tos()`
@@ -72,16 +66,22 @@ Returns an array with all the CPIM *To* headers. Each entry in the array is an o
 
 * `name` (String, optional): Display name.
 * `uri` (String): URI.
+* `value` (String): The full string value.
 
 Returns an empty array if there is no *To* header.
 
 
-### `message.tos(datas)`
+### `message.tos(values)`
 
-Sets the CPIM *To* headers (multiple values). Given `datas` must be an array of objects with these fields:
+Sets the CPIM *To* headers (multiple values). Given `values` must be an array of strings.
 
-* `name` (String, optional): Display name.
-* `uri` (String): URI.
+```javascript
+message.tos([
+    'Alice Ω∑© <im:alice@atlanta.com>',
+    'Bob å∫∂ <im:bob@biloxi.com>',
+    '<im:carol@carolina.org>'
+]);
+```
 
 
 ### `message.cc()`
@@ -90,18 +90,16 @@ Returns the first CPIM *CC* header as an object with these fields:
 
 * `name` (String, optional): Display name.
 * `uri` (String): URI.
+* `value` (String): The full string value.
 
 Returns `undefined` if there is no *CC* header.
 
 
-### `message.cc(data)`
+### `message.cc(value)`
 
-Sets the CPIM *CC* header. Given `data` must be an object with these fields:
+Sets the CPIM *To* header with the given string.
 
-* `name` (String, optional): Display name.
-* `uri` (String): URI.
-
-If `data` is `null` the header is removed.
+If `value` is `null` the header is removed.
 
 
 ### `message.ccs()`
@@ -110,16 +108,14 @@ Returns an array with all the CPIM *CC* headers. Each entry in the array is an o
 
 * `name` (String, optional): Display name.
 * `uri` (String): URI.
+* `value` (String): The full string value.
 
 Returns an empty array if there is no *CC* header.
 
 
-### `message.ccs(datas)`
+### `message.ccs(values)`
 
-Sets the CPIM *CC* headers (multiple values). Given `datas` must be an array of objects with these fields:
-
-* `name` (String, optional): Display name.
-* `uri` (String): URI.
+Sets the CPIM *CC* headers (multiple values). Given `values` must be an array of strings.
 
 
 ### `message.subject()`
@@ -252,24 +248,15 @@ message.contentType();
 ```
 
 
-### `message.contentType(data)`
+### `message.contentType(value)`
 
-Sets the MIME *Content-Type* header. Given `data` must be an object with these fields:
+Sets the MIME *Content-Type* header with the given string.
 
-* `type` (String): Type.
-* `subtype` (String): Subtype.
-* `params` (Object, optional): Param/value pairs.
-
-If `data` is `null` the header is removed.
+If `value` is `null` the header is removed.
 
 ```javascript
-message.contentType({
-    type: 'text',
-    subtype: 'html',
-    params: {
-        charset: 'utf-8'
-    }
-});
+message.contentType('text/html;charset=utf-8');
+message.contentType('text/plain  ; charset = utf-16');
 ```
 
 

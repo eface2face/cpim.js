@@ -52,6 +52,7 @@ describe('Parser', function () {
 		expect(message.header('urn:cpim:test2', 'foo')).to.be('Bar');
 
 		expect(message.contentType()).to.eql({
+			fulltype: 'text/xml',
 			type: 'text',
 			subtype: 'xml',
 			params: {
@@ -79,10 +80,7 @@ describe('Parser', function () {
 
 		// Set and parse CPIM headers.
 
-		message.from({
-			name: 'IBC œæ€',
-			uri: 'im:ibc@aliax.net'
-		});
+		message.from('IBC œæ€ <im:ibc@aliax.net>');
 
 		expect(message.from().name).to.be('IBC œæ€');
 		expect(message.from().uri).to.be('im:ibc@aliax.net');
@@ -92,9 +90,7 @@ describe('Parser', function () {
 
 		expect(message.from()).not.to.be.ok();
 
-		message.to({
-			uri: 'im:alice@atlanta.com'
-		});
+		message.to('<im:alice@atlanta.com>');
 
 		expect(message.to().name).to.be(undefined);
 		expect(message.to().uri).to.be('im:alice@atlanta.com');
@@ -105,21 +101,15 @@ describe('Parser', function () {
 		expect(message.to()).not.to.be.ok();
 
 		message.tos([
-			{
-				name: 'Alice Ω∑©',
-				uri: 'im:alice@atlanta.com'
-			},
-			{
-				name: 'Bob å∫∂',
-				uri: 'im:bob@biloxi.com'
-			}
+			'Alice Ω∑©<im:alice@atlanta.com>',
+			'Bob å∫∂ <im:bob@biloxi.com>'
 		]);
 
 		expect(message.tos()).to.eql([
 			{
 				name: 'Alice Ω∑©',
 				uri: 'im:alice@atlanta.com',
-				value: 'Alice Ω∑© <im:alice@atlanta.com>'
+				value: 'Alice Ω∑©<im:alice@atlanta.com>'
 			},
 			{
 				name: 'Bob å∫∂',
@@ -166,15 +156,10 @@ describe('Parser', function () {
 
 		expect(message.headers('urn:cpim:test4', 'qwerty')).to.eql(['QWE', 'ASD']);
 
-		message.contentType({
-			type: 'text',
-			subtype: 'plain',
-			params: {
-				charset: 'utf-16'
-			}
-		});
+		message.contentType('text/plain;charset=utf-16');
 
 		expect(message.contentType()).to.eql({
+			fulltype: 'text/plain',
 			type: 'text',
 			subtype: 'plain',
 			params: {
