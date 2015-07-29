@@ -12,6 +12,7 @@ var
 					'From: Iñaki Baz Castillo <im:inaki.baz@eface2face.com>\r\n' +
 					'To: Alicia <im:alicia@atlanta.com>\r\n' +
 					'Subject: Urgent, read pliz pliz\r\n' +
+					'DateTime: 2000-12-13T21:40:00.000Z\r\n' +
 					'\r\n' +
 					'Content-Type: text/plain ; charset = utf-8\r\n' +
 					'Content-Length: 5\r\n' +
@@ -52,6 +53,8 @@ describe('Message', function () {
 
 		message.subject('Urgent, read pliz pliz');
 
+		message.dateTime(new Date('2000-12-13T21:40:00.000Z'));
+
 		message.contentType('text/plain ; charset = utf-8');
 
 		message.mimeHeader('Content-Length', '5');
@@ -59,6 +62,8 @@ describe('Message', function () {
 		// Verify field values.
 
 		expect(message.subject()).to.be('Urgent, read pliz pliz');
+
+		expect(message.dateTime().toISOString()).to.be('2000-12-13T21:40:00.000Z');
 
 		expect(message.contentType()).to.eql({
 			fulltype: 'text/plain',

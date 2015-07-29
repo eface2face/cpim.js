@@ -1,5 +1,5 @@
 /*
- * cpim v2.0.0
+ * cpim v2.0.1
  * JavaScript implementation of CPIM "Common Presence and Instant Messaging" (RFC 3862)
  * Copyright 2015 Iñaki Baz Castillo at eFace2Face, inc. (https://eface2face.com)
  * License MIT
@@ -477,75 +477,53 @@ var
 grammar.cpimHeaderRules = {
 	From: {
 		reg: /^(.*[^ ])?[ ]*<(.*)>$/,
-		names: ['name', 'uri'],
-		format: function (data) {
-			return data.name ?
-				data.name + ' ' + '<' + data.uri + '>' :
-				'<' + data.uri + '>';
-		}
+		names: ['name', 'uri']
 	},
 
 	To: {
 		reg: /^(.*[^ ])?[ ]*<(.*)>$/,
-		names: ['name', 'uri'],
-		format: function (data) {
-			return data.name ?
-				data.name + ' ' + '<' + data.uri + '>' :
-				'<' + data.uri + '>';
-		}
+		names: ['name', 'uri']
 	},
 
 	cc: {
 		reg: /^(.*[^ ])?[ ]*<(.*)>$/,
-		names: ['name', 'uri'],
-		format: function (data) {
-			return data.name ?
-				data.name + ' ' + '<' + data.uri + '>' :
-				'<' + data.uri + '>';
-		}
+		names: ['name', 'uri']
 	},
 
 	DateTime: {
 		reg: function (value) {
-			var seconds;
+			var date;
 
 			if (typeof value === 'object') {
 				return {
-					date: value
+					date: value,
+					value: value.toISOString()
 				};
 			} else {
-				seconds = Date.parse(value);
+				date = new Date(value);
 
-				if (seconds) {
+				if (date) {
 					return {
-						date: new Date(seconds)
+						date: date,
+						value: date.toISOString()
 					};
 				} else {
 					return undefined;
 				}
 			}
-		},
-		format: function (data) {
-			return data.date.toISOString();
 		}
 	},
 
 	NS: {
 		reg: /^([a-zA-Z0-9!#$%&'+,\-\^_`|~]+)?[ ]*<(.*)>$/,
-		names: ['prefix', 'uri'],
-		format: function (data) {
-			return data.prefix ?
-				data.prefix + ' ' + '<' + data.uri + '>' :
-				'<' + data.uri + '>';
-		}
+		names: ['prefix', 'uri']
 	}
 };
 
 
 grammar.unknownCpimHeaderRule = {
 	reg: /(.*)/,
-	names: ['value'],
-	format: '%s'
+	names: ['value']
 };
 
 
@@ -582,9 +560,6 @@ grammar.mimeHeaderRules = {
 				subtype: match[2].toLowerCase(),
 				params: params
 			};
-		},
-		format: function (data) {
-			return data.value;
 		}
 	}
 };
@@ -592,8 +567,7 @@ grammar.mimeHeaderRules = {
 
 grammar.unknownMimeHeaderRule = {
 	reg: /(.*)/,
-	names: ['value'],
-	format: '%s'
+	names: ['value']
 };
 
 
@@ -630,9 +604,6 @@ Object.keys(grammar.cpimHeaderRules).forEach(function (name) {
 	if (!rule.reg) {
 		rule.reg = /(.*)/;
 	}
-	if (!rule.format) {
-		rule.format = '%s';
-	}
 });
 
 Object.keys(grammar.mimeHeaderRules).forEach(function (name) {
@@ -640,9 +611,6 @@ Object.keys(grammar.mimeHeaderRules).forEach(function (name) {
 
 	if (!rule.reg) {
 		rule.reg = /(.*)/;
-	}
-	if (!rule.format) {
-		rule.format = '%s';
 	}
 });
 
@@ -907,7 +875,9 @@ function parseMimeHeaderValue(rule, value) {
 		}
 	}
 
-	data.value = value;
+	if (!data.value) {
+		data.value = value;
+	}
 
 	return data;
 }
@@ -937,7 +907,9 @@ function parseCpimHeaderValue(rule, value) {
 		}
 	}
 
-	data.value = value;
+	if (!data.value) {
+		data.value = value;
+	}
 
 	return data;
 }
