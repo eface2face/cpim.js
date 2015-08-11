@@ -1,5 +1,5 @@
 /*
- * cpim v3.0.0
+ * cpim v3.0.1
  * JavaScript implementation of CPIM "Common Presence and Instant Messaging" (RFC 3862)
  * Copyright 2015 Iñaki Baz Castillo at eFace2Face, inc. (https://eface2face.com)
  * License MIT
@@ -17,7 +17,6 @@ var
 	 */
 	debug = require('debug')('cpim:Message'),
 	debugerror = require('debug')('cpim:ERROR:Message'),
-	mimemessage = require('mimemessage'),
 	grammar = require('./grammar'),
 	parseHeaderValue = require('./parse').parseHeaderValue;
 
@@ -235,11 +234,7 @@ Object.defineProperty(Message.prototype, 'mime', {
 	},
 	set: function (mime) {
 		if (mime) {
-			if (mime instanceof mimemessage.Entity) {
-				this._mime = mime;
-			} else {
-				throw new TypeError('mime property must be an instance of mimemessage.Entity');
-			}
+			this._mime = mime;
 		} else {
 			delete this._mime;
 		}
@@ -328,7 +323,7 @@ Message.prototype.addNS = function (uri) {
 	this._nsUris[uri] = prefix;
 };
 
-},{"./grammar":4,"./parse":5,"debug":6,"mimemessage":12}],2:[function(require,module,exports){
+},{"./grammar":4,"./parse":5,"debug":6}],2:[function(require,module,exports){
 module.exports = {
 	factory: require('./factory'),
 	parse: require('./parse'),
