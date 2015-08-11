@@ -2,7 +2,7 @@
 
 JavaScript implementation of CPIM "Common Presence and Instant Messaging" ([RFC 3862](https://tools.ietf.org/html/rfc3862)).
 
-Suitable for parsing and generating CPIM messages, allowing access to CPIM headers, MIME headers and MIME body of messages such as:
+Suitable for parsing and generating CPIM messages, allowing access to CPIM headers and the MIME component (via the [mimemessage](https://github.com/eface2face/mimemessage.js/) library) of messages such as:
 
 ```
 From: Iñaki Baz Castillo <im:inaki.baz@eface2face.com>
@@ -33,10 +33,44 @@ var cpim = require('cpim');
 
 ## Browserified library
 
-Take the browserified version of the library at `dist/cpim.js`. It exposes the global `window.cpim` module.
+The browserified version of the library at `dist/cpim.js` exposes the global `window.cpim` module.
 
 ```html
 <script type='text/javascript' src='js/cpim.js'></script>
+```
+
+
+## Usage Example
+
+Let's build a CPIM message to invite Alice to our party.
+
+```javascript
+var cpim = require('cpim');
+var message, mime;
+
+mime = cpim.mimemessage.factory({
+    contentType: 'text/html',
+    body: '<h1>Party tonight?</h1>'
+});
+
+message = cpim.factory({
+    from: 'Iñaki Baz Castillo <im:ibc@aliax.net>',
+    to: 'Alice <im:alice@atlanta.com>',
+    subject: 'Hi!',
+    mime: mime
+});
+```
+
+By calling `message.toString()` it produces the following CPIM formatted string:
+
+```
+From: Iñaki Baz Castillo <im:ibc@aliax.net>
+To: Alice <im:alice@atlanta.com>
+DateTime: 2015-08-11T12:05:43.569Z
+
+Content-Type: text/html
+
+<h1>Party tonight?</h1>
 ```
 
 
@@ -53,6 +87,12 @@ In Node set the `DEBUG=cpim*` environment variable before running the applicatio
 
 ```javascript
 process.env.DEBUG = 'cpim*';
+```
+
+You may prefer to also enable MIME debug:
+
+```javascript
+process.env.DEBUG = 'cpim* mimemessage*';
 ```
 
 In the browser run `cpim.debug.enable('cpim*');` and reload the page. Note that the debugging settings are stored into the browser LocalStorage. To disable it run `cpim.debug.disable('cpim*');`.

@@ -11,16 +11,21 @@ If given, `data` object may contain the following fields:
 
 * `from` (String): Same data passed to [message.from(value)](Message.md#messagefromvalue).
 * `to` (String): Same data passed to [message.to(value)](Message.md#messagetovalue).
-* `contentType` (String): Same data passed to [message.contentType(value)](Message.md#messagecontenttypevalue).
 * `dateTime` (Boolean): If `false` the message will not include a *DateTime* header with the current date.
-* `body` (String): MIME body of the message.
+* `mime` ([mimemessage.Entity](https://github.com/eface2face/mimemessage.js/blob/master/docs/Entity.md)): MIME component of the CPIM message.
 
 ```javascript
+var cpim = require('cpim');
+
+var mime = cpim.mimemessage.factory({
+    contentType: 'text/plain',
+    body: 'HELLO'
+});
+
 var message = cpim.factory({
     from: 'Alice <im:alice@atlanta.com>',
     to: 'Bob <im:bob@biloxi.com>',
-    contentType: 'text/plain',
-    body: 'HELLO'
+    mime: mime
 });
 ```
 
@@ -31,7 +36,7 @@ var message = cpim.factory({
 
 Parses the given raw CPIM message. If valid an instance of [Message](Message.md) is returned, `false` otherwise.
 
-* `raw` (String): A CPIM message.
+* `raw` (String): A raw CPIM message.
 
 ```javascript
 myWebSocket.onmessage = function (event) {
@@ -40,7 +45,7 @@ myWebSocket.onmessage = function (event) {
         message = cpim.parse(raw);
 
     if (message) {
-        console.log('CPIM message received: %o', message);
+        console.log('CPIM message received: %s', message);
     } else {
         console.error('invalid CPIM message received: "%s"', raw);
     }
@@ -51,3 +56,8 @@ myWebSocket.onmessage = function (event) {
 ### `cpim.Message`
 
 The [Message](Message.md) class. Useful to check `instanceof cpim.Message`.
+
+
+### `cpim.mimemessage`
+
+Reference to the [mimemessage](https://github.com/eface2face/mimemessage.js/) library. Useful to build MIME messages via `mimemessage.factory()`.

@@ -10,6 +10,23 @@ var message = new cpim.Message();
 ```
 
 
+## Properties
+
+
+### `message.mime`
+
+A getter that returns the MIME component (instance of [mimemessage.Entity](https://github.com/eface2face/mimemessage.js/blob/master/docs/Entity.md)) of the CPIM message.
+
+Returns `undefined` if there is no MIME component.
+
+
+### `message.mime = mime`
+
+Sets the MIME component of the CPIM message to the given `mime` (must be an instance of [mimemessage.Entity](https://github.com/eface2face/mimemessage.js/blob/master/docs/Entity.md)).
+
+If `mime` is `null` the body is removed.
+
+
 ## Methods
 
 
@@ -186,7 +203,7 @@ message.dateTime(now);
 
 > Headers others that those defined in [RFC 3862](http://tools.ietf.org/html/rfc3862) must carry a prefix perviously defined within a *NS* header (see [RFC 3862 section 3.4](http://tools.ietf.org/html/rfc3862#section-3.4).
 
-This method returns the first CPIM header value (string) mathing the given `nsUri` (*NS URI*string) and header `name` (string).
+This method returns the first CPIM header value (string) matching the given `nsUri` (*NS URI*string) and header `name` (string).
 
 Returns `undefined` if there is such a header.
 
@@ -210,7 +227,7 @@ message.header('urn:ietf:params:imdn', 'Message-ID', '1234j67asd');
 
 ### `message.headers(nsUri, name)`
 
-Returns an array with all the CPIM headers mathing the given `nsUri` (*NS URI* string) and header `name` (string). Each entry in the array must be a string.
+Returns an array with all the CPIM headers matching the given `nsUri` (*NS URI* string) and header `name` (string). Each entry in the array must be a string.
 
 Returns an empty array if there is no such a header.
 
@@ -224,78 +241,11 @@ message.headers('urn:local.test', 'Foo');
 
 ### `message.headers(nsUri, name, values)`
 
-Sets the CPIM *Subject* headers (multiple values) mathing the given `nsUri` (*NS URI* string) and header `name` (string). Given `values` must be an array of strings.
+Sets the CPIM *Subject* headers (multiple values) matching the given `nsUri` (*NS URI* string) and header `name` (string). Given `values` must be an array of strings.
 
 ```javascript
 message.headers('urn:local.test', 'Bar', ['bar1', 'bar2']);
 ```
-
-
-### `message.contentType()`
-
-Returns the MIME *Content-Type* header as an object with these fields:
-
-* `type` (String): Type.
-* `subtype` (String): Subtype.
-* `fulltype` (String): MIME type in "type/subtype" format (no parameters).
-* `params` (Object): Param/value pairs.
-* `value` (String): The full string value.
-
-Returns `undefined` if there is no *Content-Type* header.
-
-```javascript
-message.contentType();
-
-// => {type: 'text', subtype: 'plain', params: {charset: 'utf-16'}}
-```
-
-
-### `message.contentType(value)`
-
-Sets the MIME *Content-Type* header with the given string.
-
-If `value` is `null` the header is removed.
-
-```javascript
-message.contentType('text/html;charset=utf-8');
-message.contentType('text/plain  ; charset = utf-16');
-```
-
-
-### `message.mimeHeader()`
-
-Returns the MIME header value (string) mathing the given header `name` (string).
-
-Returns `undefined` if there is such a header.
-
-```javascript
-message.mimeHeader('Content-ID');
-
-// => "<kjhsd7kjasd@test.local>"
-```
-
-
-### `message.mimeHeader(name, value)`
-
-Sets the MIME header with the given header `name` (string) and header `value` (string).
-
-If `value` is `null` the header is removed.
-
-```javascript
-message.mimeHeader('Content-ID', '<1234@foo.com>');
-```
-
-
-### `message.body()`
-
-Returns the MIME body of the message as a string (or `undefined` if there is no body).
-
-
-### `message.body(body)`
-
-Sets the MIME body of the message to the given `body` (string).
-
-If `body` is `null` the body is removed.
 
 
 ### `message.toString()`
@@ -305,8 +255,3 @@ Serializes the message into a single string suitable for being sent to the remot
 ```javascript
 myWebSocket.send(message.toString());
 ```
-
-
-### `message.isValid()`
-
-Returns `true` if the current message is valid according to the specification rules (for example it MUST contain, at least, the 'Content-Type' MIME header).

@@ -1,5 +1,5 @@
 /*
- * cpim v2.0.1
+ * cpim v3.0.0
  * JavaScript implementation of CPIM "Common Presence and Instant Messaging" (RFC 3862)
  * Copyright 2015 Iñaki Baz Castillo at eFace2Face, inc. (https://eface2face.com)
  * License MIT
@@ -17,10 +17,9 @@ var
 	 */
 	debug = require('debug')('cpim:Message'),
 	debugerror = require('debug')('cpim:ERROR:Message'),
+	mimemessage = require('mimemessage'),
 	grammar = require('./grammar'),
-	parseMimeHeaderValue = require('./parse').parseMimeHeaderValue,
-	parseCpimHeaderValue = require('./parse').parseCpimHeaderValue,
-	slice = Array.prototype.slice;
+	parseHeaderValue = require('./parse').parseHeaderValue;
 
 debugerror.log = console.warn.bind(console);
 
@@ -28,8 +27,7 @@ debugerror.log = console.warn.bind(console);
 function Message() {
 	debug('new()');
 
-	this._cpimHeaders = {};
-	this._mimeHeaders = {};
+	this._headers = {};
 	this._body = null;
 	this._nsUris = {};
 }
@@ -38,17 +36,17 @@ function Message() {
 Message.prototype.from = function (value) {
 	// Get.
 	if (!value && value !== null) {
-		if (this._cpimHeaders.From) {
-			return this._cpimHeaders.From[0];
+		if (this._headers.From) {
+			return this._headers.From[0];
 		}
 	// Set.
 	} else if (value) {
-		this._cpimHeaders.From = [
-			parseCpimHeaderValue(grammar.cpimHeaderRules.From, value)
+		this._headers.From = [
+			parseHeaderValue(grammar.headerRules.From, value)
 		];
 	// Delete.
 	} else {
-		delete this._cpimHeaders.From;
+		delete this._headers.From;
 	}
 };
 
@@ -56,17 +54,17 @@ Message.prototype.from = function (value) {
 Message.prototype.to = function (value) {
 	// Get.
 	if (!value && value !== null) {
-		if (this._cpimHeaders.To) {
-			return this._cpimHeaders.To[0];
+		if (this._headers.To) {
+			return this._headers.To[0];
 		}
 	// Set.
 	} else if (value) {
-		this._cpimHeaders.To = [
-			parseCpimHeaderValue(grammar.cpimHeaderRules.To, value)
+		this._headers.To = [
+			parseHeaderValue(grammar.headerRules.To, value)
 		];
 	// Delete.
 	} else {
-		delete this._cpimHeaders.To;
+		delete this._headers.To;
 	}
 };
 
@@ -74,13 +72,13 @@ Message.prototype.to = function (value) {
 Message.prototype.tos = function (values) {
 	// Get.
 	if (!values) {
-		return this._cpimHeaders.To || [];
+		return this._headers.To || [];
 	// Set.
 	} else {
-		this._cpimHeaders.To = [];
+		this._headers.To = [];
 		values.forEach(function (value) {
-			this._cpimHeaders.To.push(
-				parseCpimHeaderValue(grammar.cpimHeaderRules.To, value)
+			this._headers.To.push(
+				parseHeaderValue(grammar.headerRules.To, value)
 			);
 		}, this);
 	}
@@ -90,17 +88,17 @@ Message.prototype.tos = function (values) {
 Message.prototype.cc = function (value) {
 	// Get.
 	if (!value && value !== null) {
-		if (this._cpimHeaders.CC) {
-			return this._cpimHeaders.CC[0];
+		if (this._headers.CC) {
+			return this._headers.CC[0];
 		}
 	// Set.
 	} else if (value) {
-		this._cpimHeaders.CC = [
-			parseCpimHeaderValue(grammar.cpimHeaderRules.CC, value)
+		this._headers.CC = [
+			parseHeaderValue(grammar.headerRules.CC, value)
 		];
 	// Delete.
 	} else {
-		delete this._cpimHeaders.CC;
+		delete this._headers.CC;
 	}
 };
 
@@ -108,13 +106,13 @@ Message.prototype.cc = function (value) {
 Message.prototype.ccs = function (values) {
 	// Get.
 	if (!values) {
-		return this._cpimHeaders.CC || [];
+		return this._headers.CC || [];
 	// Set.
 	} else {
-		this._cpimHeaders.CC = [];
+		this._headers.CC = [];
 		values.forEach(function (value) {
-			this._cpimHeaders.CC.push(
-				parseCpimHeaderValue(grammar.cpimHeaderRules.CC, value)
+			this._headers.CC.push(
+				parseHeaderValue(grammar.headerRules.CC, value)
 			);
 		}, this);
 	}
@@ -124,17 +122,17 @@ Message.prototype.ccs = function (values) {
 Message.prototype.subject = function (value) {
 	// Get.
 	if (!value && value !== null) {
-		if (this._cpimHeaders.Subject) {
-			return this._cpimHeaders.Subject[0].value;
+		if (this._headers.Subject) {
+			return this._headers.Subject[0].value;
 		}
 	// Set.
 	} else if (value) {
-		this._cpimHeaders.Subject = [{
+		this._headers.Subject = [{
 			value: value
 		}];
 	// Delete.
 	} else {
-		delete this._cpimHeaders.Subject;
+		delete this._headers.Subject;
 	}
 };
 
@@ -142,8 +140,8 @@ Message.prototype.subject = function (value) {
 Message.prototype.subjects = function (values) {
 	// Get.
 	if (!values) {
-		if (this._cpimHeaders.Subject) {
-			return this._cpimHeaders.Subject.map(function (data) {
+		if (this._headers.Subject) {
+			return this._headers.Subject.map(function (data) {
 				return data.value;
 			});
 		} else {
@@ -151,9 +149,9 @@ Message.prototype.subjects = function (values) {
 		}
 	// Set.
 	} else {
-		this._cpimHeaders.Subject = [];
+		this._headers.Subject = [];
 		values.forEach(function (value) {
-			this._cpimHeaders.Subject.push({value: value});
+			this._headers.Subject.push({value: value});
 		}, this);
 	}
 };
@@ -162,17 +160,17 @@ Message.prototype.subjects = function (values) {
 Message.prototype.dateTime = function (date) {
 	// Get.
 	if (!date && date !== null) {
-		if (this._cpimHeaders.DateTime) {
-			return this._cpimHeaders.DateTime[0].date;
+		if (this._headers.DateTime) {
+			return this._headers.DateTime[0].date;
 		}
 	// Set.
 	} else if (date) {
-		this._cpimHeaders.DateTime = [
-			parseCpimHeaderValue(grammar.cpimHeaderRules.DateTime, date)
+		this._headers.DateTime = [
+			parseHeaderValue(grammar.headerRules.DateTime, date)
 		];
 	// Delete.
 	} else {
-		delete this._cpimHeaders.DateTime;
+		delete this._headers.DateTime;
 	}
 };
 
@@ -185,19 +183,19 @@ Message.prototype.header = function (nsUri, name, value) {
 
 	// Get.
 	if (!value && value !== null) {
-		if (this._cpimHeaders[name]) {
-			return this._cpimHeaders[name][0].value;
+		if (this._headers[name]) {
+			return this._headers[name][0].value;
 		}
 	// Set.
 	} else if (value) {
 		this.addNS(nsUri);
 
-		this._cpimHeaders[name] = [{
+		this._headers[name] = [{
 			value: value
 		}];
 	// Delete.
 	} else {
-		delete this._cpimHeaders[name];
+		delete this._headers[name];
 	}
 };
 
@@ -210,8 +208,8 @@ Message.prototype.headers = function (nsUri, name, values) {
 
 	// Get.
 	if (!values) {
-		if (this._cpimHeaders[name]) {
-			return this._cpimHeaders[name].map(function (data) {
+		if (this._headers[name]) {
+			return this._headers[name].map(function (data) {
 				return data.value;
 			});
 		} else {
@@ -221,9 +219,9 @@ Message.prototype.headers = function (nsUri, name, values) {
 	} else {
 		this.addNS(nsUri);
 
-		this._cpimHeaders[name] = [];
+		this._headers[name] = [];
 		values.forEach(function (value) {
-			this._cpimHeaders[name].push({
+			this._headers[name].push({
 				value: value
 			});
 		}, this);
@@ -231,61 +229,22 @@ Message.prototype.headers = function (nsUri, name, values) {
 };
 
 
-Message.prototype.contentType = function (value) {
-	// Get.
-	if (!value && value !== null) {
-		return this._mimeHeaders['Content-Type'];
-	// Set.
-	} else if (value) {
-		this._mimeHeaders['Content-Type'] =
-			parseMimeHeaderValue(grammar.mimeHeaderRules['Content-Type'], value);
-	// Delete.
-	} else {
-		delete this._mimeHeaders['Content-Type'];
-	}
-};
-
-
-Message.prototype.contentId = function () {
-	var args = slice.call(arguments);
-
-	args.unshift('Content-ID');
-	return this.mimeHeader.apply(this, args);
-};
-
-
-Message.prototype.mimeHeader = function (name, value) {
-	name = grammar.headerize(name);
-
-	// Get.
-	if (!value && value !== null) {
-		if (this._mimeHeaders[name]) {
-			return this._mimeHeaders[name].value;
+Object.defineProperty(Message.prototype, 'mime', {
+	get: function () {
+		return this._mime;
+	},
+	set: function (mime) {
+		if (mime) {
+			if (mime instanceof mimemessage.Entity) {
+				this._mime = mime;
+			} else {
+				throw new TypeError('mime property must be an instance of mimemessage.Entity');
+			}
+		} else {
+			delete this._mime;
 		}
-	// Set.
-	} else if (value) {
-		this._mimeHeaders[name] = {
-			value: value
-		};
-	// Delete.
-	} else {
-		delete this._mimeHeaders[name];
 	}
-};
-
-
-Message.prototype.body = function (body) {
-	// Get.
-	if (!body && body !== null) {
-		return this._body;
-	// Set.
-	} else if (body) {
-		this._body = body;
-	// Delete.
-	} else {
-		delete this._body;
-	}
-};
+});
 
 
 Message.prototype.toString = function () {
@@ -305,14 +264,14 @@ Message.prototype.toString = function () {
 
 	// Then all the other CPIM headers.
 
-	for (name in this._cpimHeaders) {
-		if (this._cpimHeaders.hasOwnProperty(name)) {
+	for (name in this._headers) {
+		if (this._headers.hasOwnProperty(name)) {
 			// Ignore NS headers.
 			if (name === 'NS') {
 				continue;
 			}
 
-			headers = this._cpimHeaders[name];
+			headers = this._headers[name];
 
 			// Split prefixed headers.
 			if (name.indexOf('@') !== -1) {
@@ -339,40 +298,13 @@ Message.prototype.toString = function () {
 
 	raw += '\r\n';
 
-	// Then all the MIME headers.
+	// Then the MIME message.
 
-	for (name in this._mimeHeaders) {
-		if (this._mimeHeaders.hasOwnProperty(name)) {
-			header = this._mimeHeaders[name];
-
-			raw += name + ': ' + header.value + '\r\n';
-		}
+	if (this._mime) {
+		raw += this._mime.toString();
 	}
-
-	// Blank line.
-
-	raw += '\r\n';
-
-	// Body.
-
-	raw += this._body;
 
 	return raw;
-};
-
-
-Message.prototype.isValid = function () {
-	if (Object.keys(this._cpimHeaders).length === 0) {
-		debugerror('isValid() | no CPIM headers');
-		return false;
-	}
-
-	if (!this.contentType()) {
-		debugerror('isValid() | no MIME Content-Type header');
-		return false;
-	}
-
-	return true;
 };
 
 
@@ -396,14 +328,15 @@ Message.prototype.addNS = function (uri) {
 	this._nsUris[uri] = prefix;
 };
 
-},{"./grammar":4,"./parse":5,"debug":6}],2:[function(require,module,exports){
+},{"./grammar":4,"./parse":5,"debug":6,"mimemessage":12}],2:[function(require,module,exports){
 module.exports = {
 	factory: require('./factory'),
 	parse: require('./parse'),
-	Message: require('./Message')
+	Message: require('./Message'),
+	mimemessage: require('mimemessage')
 };
 
-},{"./Message":1,"./factory":3,"./parse":5}],3:[function(require,module,exports){
+},{"./Message":1,"./factory":3,"./parse":5,"mimemessage":12}],3:[function(require,module,exports){
 /**
  * Expose the factory function.
  */
@@ -437,19 +370,14 @@ function factory(data) {
 		message.to(data.to);
 	}
 
-	// Add Content-Type.
-	if (data.contentType) {
-		message.contentType(data.contentType);
-	}
-
 	// Add DateTime unless explicitly not requested.
 	if (data.dateTime !== false) {
 		message.dateTime(new Date(Date.now()));
 	}
 
 	// Add body.
-	if (data.body) {
-		message.body(data.body);
+	if (data.mime) {
+		message.mime = data.mime;
 	}
 
 	return message;
@@ -465,16 +393,13 @@ var
 	/**
 	 * Constants.
 	 */
-	REGEXP_CONTENT_TYPE = /^([^\t \/]+)\/([^\t ;]+)(.*)$/,
-	REGEXP_PARAM = /^[ \t]*([^\t =]+)[ \t]*=[ \t]*([^\t =]+)[ \t]*$/,
-	// CPIM headers that can only appear once.
-	SINGLE_CPIM_HEADERS = {
+	SINGLE_HEADERS = {
 		From: true,
 		DateTime: true
 	};
 
 
-grammar.cpimHeaderRules = {
+grammar.headerRules = {
 	From: {
 		reg: /^(.*[^ ])?[ ]*<(.*)>$/,
 		names: ['name', 'uri']
@@ -521,61 +446,22 @@ grammar.cpimHeaderRules = {
 };
 
 
-grammar.unknownCpimHeaderRule = {
+grammar.unknownHeaderRule = {
 	reg: /(.*)/,
 	names: ['value']
 };
 
 
-grammar.isSingleCpimHeader = function (name) {
-	return !!SINGLE_CPIM_HEADERS[name];
+grammar.isSingleHeader = function (name) {
+	return !!SINGLE_HEADERS[name];
 };
 
 
 grammar.NS_PREFIX_CORE = 'urn:ietf:params:cpim-headers:';
 
 
-grammar.mimeHeaderRules = {
-	'Content-Type': {
-		// reg: /^([^\t \/]+)\/([^\t ;]+).*$/,
-		reg: function (value) {
-			var
-				match = value.match(REGEXP_CONTENT_TYPE),
-				params = {};
-
-			if (!match) {
-				return undefined;
-			}
-
-			if (match[3]) {
-				params = parseParams(match[3]);
-				if (!params) {
-					return undefined;
-				}
-			}
-
-			return {
-				fulltype: match[1].toLowerCase() + '/' + match[2].toLowerCase(),
-				type: match[1].toLowerCase(),
-				subtype: match[2].toLowerCase(),
-				params: params
-			};
-		}
-	}
-};
-
-
-grammar.unknownMimeHeaderRule = {
-	reg: /(.*)/,
-	names: ['value']
-};
-
-
 grammar.headerize = function (string) {
 	var
-		exceptions = {
-			'Content-Id': 'Content-ID'
-		},
 		name = string.toLowerCase().replace(/_/g, '-').split('-'),
 		hname = '',
 		parts = name.length,
@@ -588,73 +474,26 @@ grammar.headerize = function (string) {
 		hname += name[part].charAt(0).toUpperCase() + name[part].substring(1);
 	}
 
-	if (exceptions[hname]) {
-		hname = exceptions[hname];
-	}
-
 	return hname;
 };
 
 
 // Set sensible defaults to avoid polluting the grammar with boring details.
 
-Object.keys(grammar.cpimHeaderRules).forEach(function (name) {
-	var rule = grammar.cpimHeaderRules[name];
+Object.keys(grammar.headerRules).forEach(function (name) {
+	var rule = grammar.headerRules[name];
 
 	if (!rule.reg) {
 		rule.reg = /(.*)/;
 	}
 });
-
-Object.keys(grammar.mimeHeaderRules).forEach(function (name) {
-	var rule = grammar.mimeHeaderRules[name];
-
-	if (!rule.reg) {
-		rule.reg = /(.*)/;
-	}
-});
-
-
-/**
- * Private API.
- */
-
-
-function parseParams(rawParams) {
-	var
-		splittedParams,
-		i, len,
-		paramMatch,
-		params = {};
-
-	if (rawParams === '' || rawParams === undefined || rawParams === null) {
-		return params;
-	}
-
-	splittedParams = rawParams.split(';');
-	if (splittedParams.length === 0) {
-		return undefined;
-	}
-
-	for (i = 1, len = splittedParams.length; i < len; i++) {
-		paramMatch = splittedParams[i].match(REGEXP_PARAM);
-		if (!paramMatch) {
-			return undefined;
-		}
-
-		params[paramMatch[1].toLowerCase()] = paramMatch[2];
-	}
-
-	return params;
-}
 
 },{}],5:[function(require,module,exports){
 /**
  * Expose the parse function and some util funtions within it.
  */
 module.exports = parse;
-parse.parseMimeHeaderValue = parseMimeHeaderValue;
-parse.parseCpimHeaderValue = parseCpimHeaderValue;
+parse.parseHeaderValue = parseHeaderValue;
 
 var
 	/**
@@ -662,14 +501,14 @@ var
 	 */
 	debug = require('debug')('cpim:parse'),
 	debugerror = require('debug')('cpim:ERROR:parse'),
+	mimemessage = require('mimemessage'),
 	grammar = require('./grammar'),
 	Message = require('./Message'),
 
 	/**
  	 * Constants.
  	 */
-	REGEXP_VALID_HEADER = /^(([a-zA-Z0-9!#$%&'+,\-\^_`|~]+)\.)?([a-zA-Z0-9!#$%&'+,\-\^_`|~]+):[^ ]* (.+)$/,
-	REGEXP_VALID_MIME_HEADER = /^([a-zA-Z0-9!#$%&'+,\-\^_`|~]+)[ \t]*:[ \t]*(.+)$/;  // TODO: RFC 2045
+	REGEXP_VALID_HEADER = /^(([a-zA-Z0-9!#$%&'+,\-\^_`|~]+)\.)?([a-zA-Z0-9!#$%&'+,\-\^_`|~]+):[^ ]* (.+)$/;
 
 debugerror.log = console.warn.bind(console);
 
@@ -679,10 +518,9 @@ function parse(raw) {
 
 	var
 		headersEnd,
-		mimeHeadersEnd,
 		rawHeaders,
-		rawMimeHeaders,
-		rawBody,
+		rawMime,
+		mime,
 		message;
 
 	if (typeof raw !== 'string') {
@@ -694,37 +532,31 @@ function parse(raw) {
 		debugerror('wrong headers');
 		return false;
 	}
+
 	rawHeaders = raw.slice(0, headersEnd);
-
-	mimeHeadersEnd = raw.indexOf('\r\n\r\n', headersEnd + 1);
-	rawMimeHeaders = raw.slice(headersEnd + 4, mimeHeadersEnd);
-
-	if (mimeHeadersEnd !== -1) {
-		rawBody = raw.slice(mimeHeadersEnd + 4);
-	}
+	rawMime = raw.slice(headersEnd + 4);
 
 	// Init the Message instance.
 	message = new Message();
 
 	// Parse CPIM headers.
-	if (!parseCpimHeaders(rawHeaders)) {
+	if (!parseHeaders(rawHeaders)) {
 		return false;
 	}
 
-	// Parse MIME headers.
-	if (!parseMimeHeaders(rawMimeHeaders)) {
+	// Parse MIME message.
+	mime = mimemessage.parse(rawMime);
+	if (!mime) {
+		debugerror('wrong MIME message');
 		return false;
 	}
 
-	// Get body.
-	if (rawBody) {
-		message._body = rawBody;
-	}
+	message._mime = mime;
 
 	return message;
 
 
-	function parseCpimHeaders(rawHeaders) {
+	function parseHeaders(rawHeaders) {
 		var
 			lines = rawHeaders.split('\r\n'),
 			i, len,
@@ -732,7 +564,7 @@ function parse(raw) {
 			ns = {};  // key: prefix, value: uri.
 
 		for (i = 0, len = lines.length; i < len; i++) {
-			if (!parseCpimHeader(lines[i])) {
+			if (!parseHeader(lines[i])) {
 				debugerror('discarding message due to invalid header: "%s"', lines[i]);
 				return false;
 			}
@@ -741,7 +573,7 @@ function parse(raw) {
 		return true;
 
 
-		function parseCpimHeader(line) {
+		function parseHeader(line) {
 			var
 				match = line.match(REGEXP_VALID_HEADER),
 				prefix, name, value, nsUri, rule, data;
@@ -777,15 +609,15 @@ function parse(raw) {
 				name = nsUri + '@' + name;
 			}
 
-			if (message._cpimHeaders[name] && grammar.isSingleCpimHeader(name)) {
+			if (message._headers[name] && grammar.isSingleHeader(name)) {
 				debugerror('"%s" header can only appear once', name);
 				return false;
 			}
 
-			rule = grammar.cpimHeaderRules[name] || grammar.unknownCpimHeaderRule;
+			rule = grammar.headerRules[name] || grammar.unknownHeaderRule;
 
 			try {
-				data = parseMimeHeaderValue(rule, value);
+				data = parseHeaderValue(rule, value);
 			}	catch (error) {
 				debugerror('wrong header: "%s"', line);
 				return false;
@@ -802,56 +634,14 @@ function parse(raw) {
 				message.addNS(data.uri.toLowerCase());
 			}
 
-			(message._cpimHeaders[name] = message._cpimHeaders[name] || []).push(data);
-			return true;
-		}
-	}
-
-	function parseMimeHeaders(rawMimeHeaders) {
-		var
-			lines = rawMimeHeaders.split('\r\n'),
-			i, len;
-
-		for (i = 0, len = lines.length; i < len; i++) {
-			if (!parseMimeHeader(lines[i])) {
-				debugerror('discarding message due to invalid MIME header: "%s"', lines[i]);
-				return false;
-			}
-		}
-
-		return true;
-
-
-		function parseMimeHeader(line) {
-			var
-				match = line.match(REGEXP_VALID_MIME_HEADER),
-				name, value, rule, data;
-
-			if (!match) {
-				debugerror('invalid MIME header "%s"', line);
-				return false;
-			}
-
-			name = grammar.headerize(match[1]);
-			value = match[2];
-
-			rule = grammar.mimeHeaderRules[name] || grammar.unknownMimeHeaderRule;
-
-			try {
-				data = parseMimeHeaderValue(rule, value);
-			}	catch (error) {
-				debugerror('wrong MIME header: "%s"', line);
-				return false;
-			}
-
-			message._mimeHeaders[name] = data;
+			(message._headers[name] = message._headers[name] || []).push(data);
 			return true;
 		}
 	}
 }
 
 
-function parseMimeHeaderValue(rule, value) {
+function parseHeaderValue(rule, value) {
 	var
 		parsedValue,
 		i, len,
@@ -860,7 +650,7 @@ function parseMimeHeaderValue(rule, value) {
 	if (typeof rule.reg !== 'function') {
 		parsedValue = value.match(rule.reg);
 		if (!parsedValue) {
-			throw new Error('parseMimeHeader() failed for ' + value);
+			throw new Error('parseHeaderValue() failed for ' + value);
 		}
 
 		for (i = 0, len = rule.names.length; i < len; i++) {
@@ -871,7 +661,7 @@ function parseMimeHeaderValue(rule, value) {
 	} else {
 		data = rule.reg(value);
 		if (!data) {
-			throw new Error('parseMimeHeader() failed for ' + value);
+			throw new Error('parseHeaderValue() failed for ' + value);
 		}
 	}
 
@@ -882,39 +672,7 @@ function parseMimeHeaderValue(rule, value) {
 	return data;
 }
 
-
-function parseCpimHeaderValue(rule, value) {
-	var
-		parsedValue,
-		i, len,
-		data = {};
-
-	if (typeof rule.reg !== 'function') {
-		parsedValue = value.match(rule.reg);
-		if (!parsedValue) {
-			throw new Error('parseCpimHeader() failed for ' + value);
-		}
-
-		for (i = 0, len = rule.names.length; i < len; i++) {
-			if (parsedValue[i + 1] !== undefined) {
-				data[rule.names[i]] = parsedValue[i + 1];
-			}
-		}
-	} else {
-		data = rule.reg(value);
-		if (!data) {
-			throw new Error('parseCpimHeader() failed for ' + value);
-		}
-	}
-
-	if (!data.value) {
-		data.value = value;
-	}
-
-	return data;
-}
-
-},{"./Message":1,"./grammar":4,"debug":6}],6:[function(require,module,exports){
+},{"./Message":1,"./grammar":4,"debug":6,"mimemessage":12}],6:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -1409,6 +1167,620 @@ function plural(ms, n, name) {
   if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
+
+},{}],9:[function(require,module,exports){
+/**
+ * Expose the Entity class.
+ */
+module.exports = Entity;
+
+var
+	/**
+	 * Dependencies.
+	 */
+	debug = require('debug')('mimemessage:Entity'),
+	debugerror = require('debug')('mimemessage:ERROR:Entity'),
+	randomString = require('random-string'),
+	grammar = require('./grammar'),
+	parseHeaderValue = require('./parse').parseHeaderValue;
+
+debugerror.log = console.warn.bind(console);
+
+
+function Entity() {
+	debug('new()');
+
+	this._headers = {};
+	this._body = null;
+}
+
+
+Entity.prototype.contentType = function (value) {
+	// Get.
+	if (!value && value !== null) {
+		return this._headers['Content-Type'];
+	// Set.
+	} else if (value) {
+		this._headers['Content-Type'] =
+			parseHeaderValue(grammar.headerRules['Content-Type'], value);
+	// Delete.
+	} else {
+		delete this._headers['Content-Type'];
+	}
+};
+
+
+Entity.prototype.contentTransferEncoding = function (value) {
+	var contentTransferEncoding = this._headers['Content-Transfer-Encoding'];
+
+	// Get.
+	if (!value && value !== null) {
+		return contentTransferEncoding ? contentTransferEncoding.value : undefined;
+	// Set.
+	} else if (value) {
+		this._headers['Content-Transfer-Encoding'] =
+			parseHeaderValue(grammar.headerRules['Content-Transfer-Encoding'], value);
+	// Delete.
+	} else {
+		delete this._headers['Content-Transfer-Encoding'];
+	}
+};
+
+
+Entity.prototype.header = function (name, value) {
+	name = grammar.headerize(name);
+
+	// Get.
+	if (!value && value !== null) {
+		if (this._headers[name]) {
+			return this._headers[name].value;
+		}
+	// Set.
+	} else if (value) {
+		this._headers[name] = {
+			value: value
+		};
+	// Delete.
+	} else {
+		delete this._headers[name];
+	}
+};
+
+
+Object.defineProperty(Entity.prototype, 'body', {
+	get: function () {
+		return this._body;
+	},
+	set: function (body) {
+		if (body) {
+			setBody.call(this, body);
+		} else {
+			delete this._body;
+		}
+	}
+});
+
+
+Entity.prototype.isMultiPart = function () {
+	var contentType = this._headers['Content-Type'];
+
+	if (contentType && contentType.type === 'multipart') {
+		return true;
+	} else {
+		return false;
+	}
+};
+
+
+Entity.prototype.toString = function () {
+	var
+		raw = '',
+		name, header,
+		i, len,
+		contentType = this._headers['Content-Type'],
+		boundary;
+
+	// MIME headers.
+	for (name in this._headers) {
+		if (this._headers.hasOwnProperty(name)) {
+			header = this._headers[name];
+
+			raw += name + ': ' + header.value + '\r\n';
+		}
+	}
+
+	// Body.
+	if (Array.isArray(this._body)) {
+		boundary = contentType.params.boundary;
+
+		for (i = 0, len = this._body.length; i < len; i++) {
+			raw += '\r\n--' + boundary + '\r\n' + this._body[i].toString();
+		}
+		raw += '\r\n--' + boundary + '--';
+	} else if (this._body) {
+		raw += '\r\n' + this._body.toString();
+	} else {
+		raw += '\r\n';
+	}
+
+	return raw;
+};
+
+
+/**
+ * Private API.
+ */
+
+
+function setBody(body) {
+	var contentType = this._headers['Content-Type'];
+
+	this._body = body;
+
+	// Multipart body.
+	if (Array.isArray(body)) {
+		if (!contentType || contentType.type !== 'multipart') {
+			this.contentType('multipart/mixed;boundary=' + randomString());
+		} else if (!contentType.params.boundary) {
+			this.contentType(contentType.fulltype + ';boundary=' + randomString());
+		}
+	// Single body.
+	} else {
+		if (!contentType || contentType.type === 'multipart') {
+			this.contentType('text/plain;charset=utf-8');
+		}
+	}
+}
+
+},{"./grammar":11,"./parse":13,"debug":6,"random-string":14}],10:[function(require,module,exports){
+/**
+ * Expose the factory function.
+ */
+module.exports = factory;
+
+var
+	/**
+	 * Dependencies.
+	 */
+	debug = require('debug')('mimemessage:factory'),
+	debugerror = require('debug')('mimemessage:ERROR:factory'),
+	Entity = require('./Entity');
+
+debugerror.log = console.warn.bind(console);
+
+
+function factory(data) {
+	debug('factory() | [data:%o]', data);
+
+	var entity = new Entity();
+
+	data = data || {};
+
+	// Add Content-Type.
+	if (data.contentType) {
+		entity.contentType(data.contentType);
+	}
+
+	// Add Content-Transfer-Encoding.
+	if (data.contentTransferEncoding) {
+		entity.contentTransferEncoding(data.contentTransferEncoding);
+	}
+
+	// Add body.
+	if (data.body) {
+		entity.body = data.body;
+	}
+
+	return entity;
+}
+
+},{"./Entity":9,"debug":6}],11:[function(require,module,exports){
+var
+	/**
+	 * Exported object.
+	 */
+	grammar = module.exports = {},
+
+	/**
+	 * Constants.
+	 */
+	REGEXP_CONTENT_TYPE = /^([^\t \/]+)\/([^\t ;]+)(.*)$/,
+	REGEXP_CONTENT_TRANSFER_ENCODING = /^([a-zA-Z0-9\-_]+)$/,
+	REGEXP_PARAM = /^[ \t]*([^\t =]+)[ \t]*=[ \t]*([^"\t =]+|"([^"]*)")[ \t]*$/;
+
+
+grammar.headerRules = {
+	'Content-Type': {
+		reg: function (value) {
+			var
+				match = value.match(REGEXP_CONTENT_TYPE),
+				params = {};
+
+			if (!match) {
+				return undefined;
+			}
+
+			if (match[3]) {
+				params = parseParams(match[3]);
+				if (!params) {
+					return undefined;
+				}
+			}
+
+			return {
+				fulltype: match[1].toLowerCase() + '/' + match[2].toLowerCase(),
+				type: match[1].toLowerCase(),
+				subtype: match[2].toLowerCase(),
+				params: params
+			};
+		}
+	},
+
+	'Content-Transfer-Encoding': {
+		reg: function (value) {
+			var match = value.match(REGEXP_CONTENT_TRANSFER_ENCODING);
+
+			if (!match) {
+				return undefined;
+			}
+
+			return {
+				value: match[1].toLowerCase()
+			};
+		}
+	}
+};
+
+
+grammar.unknownHeaderRule = {
+	reg: /(.*)/,
+	names: ['value']
+};
+
+
+grammar.headerize = function (string) {
+	var
+		exceptions = {
+			'Mime-Version': 'MIME-Version',
+			'Content-Id': 'Content-ID'
+		},
+		name = string.toLowerCase().replace(/_/g, '-').split('-'),
+		hname = '',
+		parts = name.length,
+		part;
+
+	for (part = 0; part < parts; part++) {
+		if (part !== 0) {
+			hname += '-';
+		}
+		hname += name[part].charAt(0).toUpperCase() + name[part].substring(1);
+	}
+
+	if (exceptions[hname]) {
+		hname = exceptions[hname];
+	}
+
+	return hname;
+};
+
+
+// Set sensible defaults to avoid polluting the grammar with boring details.
+
+Object.keys(grammar.headerRules).forEach(function (name) {
+	var rule = grammar.headerRules[name];
+
+	if (!rule.reg) {
+		rule.reg = /(.*)/;
+	}
+});
+
+
+/**
+ * Private API.
+ */
+
+
+function parseParams(rawParams) {
+	var
+		splittedParams,
+		i, len,
+		paramMatch,
+		params = {};
+
+	if (rawParams === '' || rawParams === undefined || rawParams === null) {
+		return params;
+	}
+
+	splittedParams = rawParams.split(';');
+	if (splittedParams.length === 0) {
+		return undefined;
+	}
+
+	for (i = 1, len = splittedParams.length; i < len; i++) {
+		paramMatch = splittedParams[i].match(REGEXP_PARAM);
+		if (!paramMatch) {
+			return undefined;
+		}
+
+		params[paramMatch[1].toLowerCase()] = paramMatch[3] || paramMatch[2];
+	}
+
+	return params;
+}
+
+},{}],12:[function(require,module,exports){
+module.exports = {
+	factory: require('./factory'),
+	parse: require('./parse'),
+	Entity: require('./Entity')
+};
+
+
+},{"./Entity":9,"./factory":10,"./parse":13}],13:[function(require,module,exports){
+/**
+ * Expose the parse function and some util funtions within it.
+ */
+module.exports = parse;
+parse.parseHeaderValue = parseHeaderValue;
+
+var
+	/**
+	 * Dependencies.
+	 */
+	debug = require('debug')('mimemessage:parse'),
+	debugerror = require('debug')('mimemessage:ERROR:parse'),
+	grammar = require('./grammar'),
+	Entity = require('./Entity'),
+
+	/**
+ 	 * Constants.
+ 	 */
+	REGEXP_VALID_MIME_HEADER = /^([a-zA-Z0-9!#$%&'+,\-\^_`|~]+)[ \t]*:[ \t]*(.+)$/;
+
+debugerror.log = console.warn.bind(console);
+
+
+function parse(rawMessage) {
+	debug('parse()');
+
+	var entity = new Entity();
+
+	if (typeof rawMessage !== 'string') {
+		throw new TypeError('given data must be a string');
+	}
+
+	if (!parseEntity(entity, rawMessage, true)) {
+		debugerror('invalid MIME message');
+		return false;
+	}
+
+	return entity;
+}
+
+
+function parseEntity(entity, rawEntity, topLevel) {
+	debug('parseEntity()');
+
+	var
+		headersEnd,
+		rawHeaders,
+		rawBody,
+		contentType, boundary,
+		boundaryRegExp, boundaryEndRegExp, match, partStart,
+		parts = [],
+		i, len,
+		subEntity;
+
+	headersEnd = rawEntity.indexOf('\r\n\r\n');
+
+	if (headersEnd !== -1) {
+		rawHeaders = rawEntity.slice(0, headersEnd);
+		rawBody = rawEntity.slice(headersEnd + 4);
+	} else if (topLevel) {
+		debugerror('parseEntity() | wrong MIME headers in top level entity');
+		return false;
+	} else {
+		if (/^\r\n/.test(rawEntity)) {
+			rawBody = rawEntity.slice(2);
+		} else {
+			debugerror('parseEntity() | wrong sub-entity');
+			return false;
+		}
+	}
+
+	if (rawHeaders && !parseEntityHeaders(entity, rawHeaders)) {
+		return false;
+	}
+
+	contentType = entity.contentType();
+
+	// Multipart body.
+	if (contentType && contentType.type === 'multipart') {
+		boundary = contentType.params.boundary;
+		if (!boundary) {
+			debugerror('parseEntity() | "multipart" Content-Type must have "boundary" parameter');
+			return false;
+		}
+
+		// Build the complete boundary regexps.
+		boundaryRegExp = new RegExp('(\\r\\n)?--' + boundary + '[\\t ]*\\r\\n', 'g');
+		boundaryEndRegExp = new RegExp('\\r\\n--' + boundary + '--[\\t ]*');
+
+		while (true) {
+			match = boundaryRegExp.exec(rawBody);
+
+			if (match) {
+				if (partStart !== undefined) {
+					parts.push(rawBody.slice(partStart, match.index));
+				}
+
+				partStart = boundaryRegExp.lastIndex;
+			} else {
+				if (partStart === undefined) {
+					debugerror('parseEntity() | no bodies found in a "multipart" sub-entity');
+					return false;
+				}
+
+				boundaryEndRegExp.lastIndex = partStart;
+				match = boundaryEndRegExp.exec(rawBody);
+
+				if (!match) {
+					debugerror('parseEntity() | no ending boundary in a "multipart" sub-entity');
+					return false;
+				}
+
+				parts.push(rawBody.slice(partStart, match.index));
+				break;
+			}
+		}
+
+		entity._body = [];
+
+		for (i = 0, len = parts.length; i < len; i++) {
+			subEntity = new Entity();
+			entity._body.push(subEntity);
+
+			if (!parseEntity(subEntity, parts[i])) {
+				debugerror('invalid MIME sub-entity');
+				return false;
+			}
+		}
+	// Non multipart body.
+	} else {
+		entity._body = rawBody;
+	}
+
+	return true;
+}
+
+
+function parseEntityHeaders(entity, rawHeaders) {
+	var
+		lines = rawHeaders.split('\r\n'),
+		line,
+		i, len;
+
+	for (i = 0, len = lines.length; i < len; i++) {
+		line = lines[i];
+
+		while (/^[ \t]/.test(lines[i + 1])) {
+			line = line + ' ' + lines[i + 1].trim();
+			i++;
+		}
+
+		if (!parseHeader(entity, line)) {
+			debugerror('parseEntityHeaders() | invalid MIME header: "%s"', line);
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+function parseHeader(entity, rawHeader) {
+	var
+		match = rawHeader.match(REGEXP_VALID_MIME_HEADER),
+		name, value, rule, data;
+
+	if (!match) {
+		debugerror('invalid MIME header "%s"', rawHeader);
+		return false;
+	}
+
+	name = grammar.headerize(match[1]);
+	value = match[2];
+
+	rule = grammar.headerRules[name] || grammar.unknownHeaderRule;
+
+	try {
+		data = parseHeaderValue(rule, value);
+	}	catch (error) {
+		debugerror('wrong MIME header: "%s"', rawHeader);
+		return false;
+	}
+
+	entity._headers[name] = data;
+	return true;
+}
+
+
+function parseHeaderValue(rule, value) {
+	var
+		parsedValue,
+		i, len,
+		data = {};
+
+	if (typeof rule.reg !== 'function') {
+		parsedValue = value.match(rule.reg);
+		if (!parsedValue) {
+			throw new Error('parseHeaderValue() failed for ' + value);
+		}
+
+		for (i = 0, len = rule.names.length; i < len; i++) {
+			if (parsedValue[i + 1] !== undefined) {
+				data[rule.names[i]] = parsedValue[i + 1];
+			}
+		}
+	} else {
+		data = rule.reg(value);
+		if (!data) {
+			throw new Error('parseHeaderValue() failed for ' + value);
+		}
+	}
+
+	if (!data.value) {
+		data.value = value;
+	}
+
+	return data;
+}
+
+},{"./Entity":9,"./grammar":11,"debug":6}],14:[function(require,module,exports){
+/*
+ * random-string
+ * https://github.com/valiton/node-random-string
+ *
+ * Copyright (c) 2013 Valiton GmbH, Bastian 'hereandnow' Behrens
+ * Licensed under the MIT license.
+ */
+
+'use strict';
+
+var numbers = '0123456789',
+    letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+    specials = '!$%^&*()_+|~-=`{}[]:;<>?,./';
+
+
+function _defaults (opts) {
+  opts || (opts = {});
+  return {
+    length: opts.length || 8,
+    numeric: typeof opts.numeric === 'boolean' ? opts.numeric : true,
+    letters: typeof opts.letters === 'boolean' ? opts.letters : true,
+    special: typeof opts.special === 'boolean' ? opts.special : false
+  };
+}
+
+function _buildChars (opts) {
+  var chars = '';
+  if (opts.numeric) { chars += numbers; }
+  if (opts.letters) { chars += letters; }
+  if (opts.special) { chars += specials; }
+  return chars;
+}
+
+module.exports = function randomString(opts) {
+  opts = _defaults(opts);
+  var i, rn,
+      rnd = '',
+      len = opts.length,
+      randomChars = _buildChars(opts);
+  for (i = 1; i <= len; i++) {
+    rnd += randomChars.substring(rn = Math.floor(Math.random() * randomChars.length), rn + 1);
+  }
+  return rnd;
+};
 
 },{}]},{},[2])(2)
 });

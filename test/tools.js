@@ -16,5 +16,7 @@ module.exports.readFile = function (filename) {
 		filepath = path.join(__dirname, MESSAGES_FOLDER, filename),
 		content = fs.readFileSync(filepath, 'utf8');
 
-	return content.replace(/\n/g, '\r\n');
+	// NOTE: Return this in case files are not CRLF line ended.
+	// return content.replace(/\n/g, '\r\n');
+	return content;
 };
