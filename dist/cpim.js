@@ -1,5 +1,5 @@
 /*
- * cpim v3.0.2
+ * cpim v3.0.3
  * JavaScript implementation of CPIM "Common Presence and Instant Messaging" (RFC 3862)
  * Copyright 2015 Iñaki Baz Castillo at eFace2Face, inc. (https://eface2face.com)
  * License MIT
@@ -1548,11 +1548,13 @@ debugerror.log = console.warn.bind(console);
 function parse(rawMessage) {
 	debug('parse()');
 
-	var entity = new Entity();
+	var entity;
 
 	if (typeof rawMessage !== 'string') {
 		throw new TypeError('given data must be a string');
 	}
+
+	entity = new Entity();
 
 	if (!parseEntity(entity, rawMessage, true)) {
 		debugerror('invalid MIME message');
@@ -1567,7 +1569,7 @@ function parseEntity(entity, rawEntity, topLevel) {
 	debug('parseEntity()');
 
 	var
-		headersEnd,
+		headersEnd = -1,
 		rawHeaders,
 		rawBody,
 		contentType, boundary,
@@ -1576,7 +1578,10 @@ function parseEntity(entity, rawEntity, topLevel) {
 		i, len,
 		subEntity;
 
-	headersEnd = rawEntity.indexOf('\r\n\r\n');
+	// Just look for headers if first line is not empty.
+	if (/^[^\r\n]/.test(rawEntity)) {
+		headersEnd = rawEntity.indexOf('\r\n\r\n');
+	}
 
 	if (headersEnd !== -1) {
 		rawHeaders = rawEntity.slice(0, headersEnd);
